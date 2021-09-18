@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <link rel="shortcut icon" href="favicon/favicon.ico">
+    <link rel="icon" type="image/ico" href="favicon/favicon.ico">
+
+    <title>Ryno's Project Demo</title>
+
+    <link rel="stylesheet" href="">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+  </head>
+
+  <body>
+
+  <h1 id="title">Ryno's Project Demo</h1>
+
+  <div id="nav">
+      <button id="oscBtn" onClick="{ let x = document.getElementById('oscSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Oscillator</button>
+      <button id="volKickBtn" onClick="{ let x = document.getElementById('volKickSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Volume/Kick</button>
+      <button id="rateBtn" onClick="{ let x = document.getElementById('rateSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Rate</button>
+      <button id="colorBtn" onClick="{ let x = document.getElementById('colorSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Color</button>
+      <button id="demoBtn" onClick="{ let x = document.getElementById('demoSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Demo</button>
+      <button id="filterBtn" onClick="{ let x = document.getElementById('filterSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Filter</button>
+      <button id="clipBtn" onClick="{ let x = document.getElementById('clipSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Clips</button>
+      <button id="mockBtn" onClick="{ let x = document.getElementById('mockSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Mock</button>
+      <p></p>
+  </div>
+
+  <div id="oscSection" hidden style="background-color:GhostWhite;">
+    <div>
+      <button class="soundBtn" id="createBtn">Create Sound</button>
+      <button class="soundBtn" id="pauseBtn">Pause</button>
+      <button class="soundBtn" id="stopBtn">Stop</button>
+      <br>
+      <button class="musicBtn" id="musicBtn">Waiting...</button>
+    </div>
+    <div>
+      <label id="volumeLbl" for="volumeSldr">Volume: </label>
+      <span id=volumeVal></span>
+      <br>
+      <input name="volumeSldr" id='volumeSldr' type="range" min="0" max="100" value="50">
+    </div>
+    <div>
+      Pitch: <span id="sliderOutput"></span>
+      <input type="range" min="0" max="200" value="100" id="testSlider">
+    </div>
+
+    <div>
+      Detune: <span id="detuneOutput"></span>
+      <input type="range" min="-1200" max="1200" value="0" id="detuneSlider">
+    </div>
+
+    <p id="timeLbl">Current context time: No context exists.</p>
+  </div>
+  <p></p>
+
+  <div id="volKickSection" hidden style="background-color:WhiteSmoke;">
+    <p><text id="kick">Browser has not been kicked yet</text></p>
+    <p><button id="toggleButton" style="display: block" disabled="true" onclick="sample.toggle();">Please wait, loading...</button></p>
+    <p><input type="range" min="0" max="100" value="100" oninput="sample.changeVolume(this);"> Volume</p>
+  </div>
+  <p></p>
+
+  <div id="rateSection" hidden style="background-color:GhostWhite;">
+    <button id="pitchLoad">Load</button>
+    <label> Playback rate: <input id="pitchRate" type="number" min="0.1" max="10" step="0.01" value="1"></label>
+    <button id="pitchPlay">Play</button>
+  </div>
+  <p></p>
+
+  <div id="colorSection" hidden style="background-color:WhiteSmoke;">
+    <label id="colorLabel" for="colorSelector">Choose your color:</label>
+    <input type="color" id="colorSelector" name="colorSelector" value="#ff0000">
+  </div>
+  <p></p>
+
+  <div id="demoSection" hidden style="background-color:GhostWhite;">
+    <div>
+      <button id="demoCreate">Create</button>
+      <button id="demoKick">Kick</button>
+      <button id="demoPlay">Play</button>
+      <button id="demoPause">Pause</button>
+      <button id="demoStop">Stop</button>
+      <br>
+      <button id="demoMusic" disabled="disabled">Waiting...</button>
+      <button id="test1" disabled="disabled">Test1</button>
+    </div>
+    <div>
+      <input id='demoVolumeSldr' name="demoVolumeSldr" type="range" min="0" max="100" value="50">
+      <label id="demoVolumeLbl" for="demoVolumeSlldr">Volume: </label>
+      <span id=demoVolumeVal></span>
+      <br>
+    </div>
+
+    <div>
+      <input id='demoPitchSldr' name="demoPitchSldr" type="range" min="0" max="200" value="100">
+      <label id="demoPitchLbl" for="demoPitchSldr">Pitch: </label>
+      <span id=demoPitchVal></span>
+    </div>
+
+    <div>
+      <input id='demoDetuneSldr' name="demoDetuneSldr" type="range" min="-1200" max="1200" value="0">
+      <label id="demoDetuneLbl" for="demoDetuneSldr">Detune: </label>
+      <span id=demoDetuneVal></span>
+    </div>
+
+    <p id="demoTime">Current context time: No context exists.</p>
+  </div>
+
+  <div id="filterSection" hidden style="background-color:WhiteSmoke;">
+    <div>
+      <button id="filterCreate">Create</button>
+      <button id="filterPlay">Play</button>
+      <button id="filterPause">Pause</button>
+      <button id="filterStop">Stop</button>
+    </div>
+    
+    <div id=filterLow>
+      <label>Low Shelf</label>
+      <br>
+      <input id="filterLowFreqSldr" name="filterLowFreqSldr" type="range" min="0" max="300" value="150">
+      <label id="filterLowFreqLbl" for="filterLowFreqLbl">Frequency: </label>
+      <span id=filterLowFreqVal></span>
+      <br>
+      <input id="filterLowGainSldr" name="filterLowGainSldr" type="range" min="-20" max="20" value="0">
+      <label id="filterLowGainLbl" for="filterLowGainLbl">Gain: </label>
+      <span id=filterLowGainVal></span>
+    </div>
+
+    <div id=filterHigh>
+      <label>High Shelf</label>
+      <br>
+      <input id="filterHighFreqSldr" name="filterHighFreqSldr" type="range" min="300" max="16000" value="4000">
+      <label id="filterHighFreqLbl" for="filterHighFreqLbl">Frequency: </label>
+      <span id=filterHighFreqVal></span>
+      <br>
+      <input id="filterHighGainSldr" name="filterHighGainSldr" type="range" min="-20" max="20" value="0">
+      <label id="filterHighGainLbl" for="filterHighGainLbl">Gain: </label>
+      <span id=filterHighGainVal></span>
+    </div>
+
+    <div id=filterThresh>
+      <label>Threshold</label>
+      <br>
+      <input id="filterThreshFreqSldr" name="filterThreshFreqSldr" type="range" min="300" max="10000" value="300">
+      <label id="filterThreshFreqLbl" for="filterThreshFreqLbl">Frequency: </label>
+      <span id=filterThreshFreqVal></span>
+    </div>
+
+    <div id=filterMid>
+      <label>Peaking</label>
+      <br>
+      <input id="filterMidFreqSldr" name="filterMidFreqSldr" type="range" min="300" max="4000" value="2000">
+      <label id="filterMidFreqLbl" for="filterMidFreqLbl">Frequency: </label>
+      <span id=filterMidFreqVal></span>
+      <br>
+      <input id="filterMidQSldr" name="filterMidQSldr" type="range" min="0" max="2000" value="1000">
+      <label id="filterMidQLbl" for="filterMidQLbl">Q: </label>
+      <span id=filterMidQVal></span>
+      <br>
+      <input id="filterMidGainSldr" name="filterMidGainSldr" type="range" min="-20" max="20" value="0">
+      <label id="filterMidGainLbl" for="filterMidGainLbl">Gain: </label>
+      <span id=filterMidGainVal></span>
+    </div>
+
+    <div id=filterGain>
+      <label>Overall Volume</label>
+      <br>
+      <input id="filterVolSldr" name="filterVolSldr" type="range" min="-0" max="100" value="50">
+      <label id="filterVolLbl" for="filterVolLbl">Volume: </label>
+      <span id=filterVolVal></span>
+    </div>
+
+  </div>
+
+  <div id="clipSection" hidden style="background-color:GhostWhite;">
+    <div>
+      <button id="clipCreate">Create</button>
+      <button id="clipBuffer">Make Buffer</button>
+      <button id="clipToggle">Play</button>
+      <button id="clipStart">Start</button>
+      <!-- <button id="clipPause">Pause</button> -->
+      <button id="clipStop">Stop</button>
+    </div>
+
+    <div id=clipRate>
+      <label>How often to play</label>
+      <br>
+      <input id="clipRateSldr" name="clipRateSldr" type="range" min="1" max="60" value="1">
+      <label id="clipRateLbl" for="clipRateLbl">Rate: </label>
+      <span id=clipRateVal></span>
+    </div>
+    
+    <div id=clipLow>
+      <label>Low Shelf</label>
+      <br>
+      <input id="clipLowFreqSldr" name="clipLowFreqSldr" type="range" min="0" max="300" value="150">
+      <label id="clipLowFreqLbl" for="clipLowFreqLbl">Frequency: </label>
+      <span id=clipLowFreqVal></span>
+      <br>
+      <input id="clipLowGainSldr" name="clipLowGainSldr" type="range" min="-20" max="20" value="0">
+      <label id="clipLowGainLbl" for="clipLowGainLbl">Gain: </label>
+      <span id=clipLowGainVal></span>
+    </div>
+
+    <div id=clipHigh>
+      <label>High Shelf</label>
+      <br>
+      <input id="clipHighFreqSldr" name="clipHighFreqSldr" type="range" min="300" max="16000" value="4000">
+      <label id="clipHighFreqLbl" for="clipHighFreqLbl">Frequency: </label>
+      <span id=clipHighFreqVal></span>
+      <br>
+      <input id="clipHighGainSldr" name="clipHighGainSldr" type="range" min="-20" max="20" value="0">
+      <label id="clipHighGainLbl" for="clipHighGainLbl">Gain: </label>
+      <span id=clipHighGainVal></span>
+    </div>
+
+    <div id=clipThresh>
+      <label>Threshold</label>
+      <br>
+      <input id="clipThreshFreqSldr" name="clipThreshFreqSldr" type="range" min="300" max="10000" value="300">
+      <label id="clipThreshFreqLbl" for="clipThreshFreqLbl">Frequency: </label>
+      <span id=clipThreshFreqVal></span>
+    </div>
+
+    <div id=clipGain>
+      <label>Overall Volume</label>
+      <br>
+      <input id="clipVolSldr" name="clipVolSldr" type="range" min="-0" max="100" value="50">
+      <label id="clipVolLbl" for="clipVolLbl">Volume: </label>
+      <span id=clipVolVal></span>
+    </div>
+
+  </div>
+
+  <div id="mockSection" hidden style="background-color:WhiteSmoke;">
+    <div>
+      <button id="mockCreate">Create</button>
+      <button id="mockLoad">Load</button>
+      <button id="mockToggle" disabled="true">Play</button>
+      <button id="mockStop" disabled="true">Stop</button>
+      <br>
+      <button id="mockScriptRAIN">RAIN</button>
+      <button id="mockScriptSTOP">STOP</button>
+      <button id="mockScriptLabel">Label</button>
+    </div>
+
+    <div id=mockLow>
+      <label id="mockLowGainLbl" for="mockLowGainLbl">Lows: </label>
+      <span id=mockLowGainVal></span>
+      <br>
+      <input id="mockLowGainSldr" name="mockLowGainSldr" type="range" min="-20" max="20" value="0">
+    </div>
+
+    <div id=mockHigh>
+      <label id="mockHighGainLbl" for="mockHighGainLbl">Highs: </label>
+      <span id=mockHighGainVal></span>
+      <br>
+      <input id="mockHighGainSldr" name="mockHighGainSldr" type="range" min="-20" max="20" value="0">
+    </div>
+
+    <div id=mockThresh>
+      <label id="mockThreshFreqLbl" for="mockThreshFreqLbl">Frequency: </label>
+      <span id=mockThreshFreqVal></span>
+      <br>
+      <input id="mockThreshFreqSldr" name="mockThreshFreqSldr" type="range" min="300" max="10000" value="300">
+    </div>
+
+    <div id=mockGain>
+      <label id="mockVolLbl" for="mockVolLbl">Volume: </label>
+      <span id=mockVolVal></span>
+      <br>
+      <input id="mockVolSldr" name="mockVolSldr" type="range" min="-0" max="100" value="50">
+    </div>
+
+    <div id=mockSoundList>
+    </div>
+
+    <div id=mockClipList>
+    </div>
+
+  </div>
+
+<script src="script.js"></script>
+<script src="BufferLoader.js"></script>
+<!-- <script src="webaudio.js"></script> -->
+<script src="rate.js"></script>
+
+  <!-- <script>
+  let sample = new VolumeSample();
+  </script> -->
+  </body>
+</html>

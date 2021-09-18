@@ -1,0 +1,11 @@
+https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi
+https://learn.adafruit.com/neopixels-on-raspberry-pi/raspberry-pi-wiring
+
+https://circuitpython.readthedocs.io/projects/neopixel/en/latest/
+https://learn.adafruit.com/adafruit-neopixel-uberguide/python-circuitpython
+
+
+https://code.visualstudio.com/docs/python/python-tutorial#_prerequisites
+
+https://wiki.python.org/moin/BeginnersGuide
+
