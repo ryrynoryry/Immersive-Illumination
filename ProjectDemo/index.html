@@ -272,9 +272,13 @@
 
     <div id=mockGain>
       <label id="mockVolLbl" for="mockVolLbl">Volume: </label>
-      <span id=mockVolVal></span>
+      <output id=mockVolVal for="mockVolSldr"></output>
       <br>
       <input id="mockVolSldr" name="mockVolSldr" type="range" min="-0" max="100" value="50">
+    </div>
+
+    <!-- STRETCH GOAL: Area to display all information related to a particular audio context. (state, clip name, etc) -->
+    <div id=mockContextStatus>
     </div>
 
     <div id=mockSoundList>
@@ -284,7 +288,7 @@
     </div>
 
   </div>
-
+<script src="old.js"></script>
 <script src="script.js"></script>
 <script src="BufferLoader.js"></script>
 <!-- <script src="webaudio.js"></script> -->
