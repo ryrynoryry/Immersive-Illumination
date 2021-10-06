@@ -80,6 +80,8 @@ displayTime();
 
 const volumeSlider = document.querySelector('#volumeSldr');
 let volumeValue = document.querySelector("#volumeVal");
+const volumeSliderLinear = document.querySelector('#volumeSldrLinear');
+let volumeValueLinear = document.querySelector("#volumeValLinear");
 
 volumeSlider.oninput = function() {
   if (typeof gainNode !== 'undefined') {
@@ -87,6 +89,11 @@ volumeSlider.oninput = function() {
   }
   volumeValue.innerHTML = this.value;
   WriteValue(this.value, "writeValue.php", "volume.txt", "w+");
+}
+
+volumeSliderLinear.oninput = function() {
+  gainNode.gain.value = parseInt(this.value) / parseInt(this.max);
+  volumeValueLinear.innerHTML = this.value;
 }
 
 // VOLUME SLIDER!!

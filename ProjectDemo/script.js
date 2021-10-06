@@ -24,8 +24,11 @@ let mock_ClipObj = {
   buffers: Array(),
   gainNode: undefined,
   lowNode: undefined,
+  midNode: undefined,
   highNode: undefined,
-  volume: undefined
+  volume: undefined,
+  isPlaying: false,
+  statusLabel: undefined
 }
 
 let mock_RainObj = {
@@ -34,8 +37,11 @@ let mock_RainObj = {
   buffers: Array(),
   gainNode: undefined,
   lowNode: undefined,
+  midNode: undefined,
   highNode: undefined,
-  volume: undefined
+  volume: undefined,
+  isPlaying: false,
+  statusLabel: undefined
 }
 
 let mock_LowNode;
@@ -68,23 +74,46 @@ let mock_VolVal = document.querySelector("#mockVolVal");
 let mock_SoundList = document.querySelector("#mockSoundList");
 let mock_ClipList = document.querySelector("#mockClipList");
 
+let mock_ClipsHidden = document.querySelector("#mockClipsHidden");
+let mock_ClipsAdvanced = document.querySelector("#mockClipsAdvanced");
+
 let mockListOfSoundFiles = {array: new Array()};
 let mockListOfClipFiles = {array: new Array()};
 
-function mock_BuffersLoaded(listofBuffers) {
-  console.log("mock buffers loaded");
-  mock_BufferList = listofBuffers;
-  console.log(mock_BufferList);
-  // mock_BufferCount = mock_BufferList.length();
-  mock_CreateBtn.style.backgroundColor = "#00FF00";
-  mock_ToggleBtn.removeAttribute('disabled');
-  mock_StopBtn.removeAttribute('disabled');
+const mockRainTimeDisplay = {
+  label: document.querySelector('#mockTimeLabel'),
+  obj: mock_RainObj
 }
 
-function mock_CreateList(urlArray) {
-  var innerList = document.getElementById("mockInnerList");
-  if (innerList == null) {
-    innerList = document.createElement('ol');
+const mockClipsTimeDisplay = {
+  label: document.querySelector('#mockClipsTimeLabel'),
+  obj: mock_ClipObj
+}
+
+function mockDisplayTime(timeDisplay) {
+  if(timeDisplay.obj.audioCtx && timeDisplay.obj.audioCtx.state !== 'closed') {
+    timeDisplay.label.textContent = 'Current context time: ' + timeDisplay.obj.audioCtx.currentTime.toFixed(3);
+  } else {
+    timeDisplay.label.textContent = 'Current context time: No context exists.'
+  }
+  requestAnimationFrame(function() {
+    mockDisplayTime(timeDisplay);
+  });
+}
+
+function mock_BuffersLoaded(listofBuffers, obj) {
+  console.log("mock buffers loaded");
+  // mock_BufferList = listofBuffers;
+  // console.log(listofBuffers);
+  // console.log(mock_RainObj.buffers);
+  // mock_BufferCount = mock_BufferList.length();
+  // mock_ToggleBtn.removeAttribute('disabled');
+  // mock_StopBtn.removeAttribute('disabled');
+  obj.statusLabel.textContent = "Play";
+}
+
+function mock_CreateList(urlArray, listElement) {
+    var innerList = document.createElement('ol');
     innerList.setAttribute("id", "mockInnerList");
 
     for (let i = 0; i < urlArray.length; i++) {
@@ -98,21 +127,20 @@ function mock_CreateList(urlArray) {
       listItem.appendChild(listItemPercent);
       innerList.appendChild(listItem);
     }
-    mock_ClipList.appendChild(innerList);
-  }
+    listElement.list.appendChild(innerList);
 }
 
 function mock_ShowProgress(event, urlArray, index) {
   if (event.lengthComputable) {
     var complete = (event.loaded / event.total * 100 | 0);
-    document.getElementById(urlArray[index]).lastChild.nodeValue = " - " + complete + '% (' + event.loaded + '/' + event.total + "KB)";
+    document.getElementById(urlArray[index]).lastChild.nodeValue = " - " + complete + '% (' + event.loaded / 1000 + '/' + event.total / 1000 + "KB)";
   }
   else {
     document.getElementById(urlArray[index]).lastChild.nodeValue = "?";
   }
 }
 
-function mock_FirstBufferLoaded(myBuffer) {
+function mock_FirstBufferLoaded(myBuffer, obj) {
   console.log("mock first buffer loaded: " + myBuffer);
 }
 
@@ -144,7 +172,7 @@ mock_LoadBtn.onclick = function () {
 
   // mock_BufferSource = mock_AudioCtx.createBufferSource();
 
-  // mock_BufferSource.onended() = function() {
+  // mock_BufferSource.onended = function() {
   //   console.log("mock ended");
   //   mock_BufferSource[mock_BufferSource.stop ? 'stop' : 'noteOff'](0);
   // }
@@ -198,14 +226,24 @@ function mock_InitializeContext(obj) {
 
   obj.lowNode = obj.audioCtx.createBiquadFilter();
   obj.lowNode.type = "lowshelf";
+  obj.midNode = obj.audioCtx.createBiquadFilter();
+  obj.midNode.type = "peaking";
   obj.highNode = obj.audioCtx.createBiquadFilter();
   obj.highNode.type = "highshelf";
 
-  obj.lowNode.connect(obj.highNode);
+  obj.lowNode.connect(obj.midNode);
+  obj.midNode.connect(obj.highNode);
   obj.highNode.connect(obj.gainNode);
   obj.gainNode.connect(obj.audioCtx.destination);
 
-  mock_GainNode.gain.value = 0.5;
+  obj.gainNode.gain.value = 0.5;
+
+  var audio = new Audio('1-second-of-silence.mp3');
+  audio.play();
+
+  obj.audioCtx.onstatechange = function() {
+    console.log(obj.audioCtx.state);
+  }
 }
 
 
@@ -213,67 +251,15 @@ mock_CreateBtn.onclick = function () {
   // create web audio api context
   console.log("mock clicked");
 
-  const dir = "clips";
-  mock_ListFiles(dir, mockListOfClipFiles, "listFiles.php", mock_LoadSounds);
+  const dir = "sounds";
+  mock_ListFiles(dir, mockListOfSoundFiles, "listFiles.php", mock_LoadSounds, mock_RainObj);
+  mockDisplayTime(mockRainTimeDisplay);
+  mock_InitializeContext(mock_RainObj);
 
-  mock_InitializeContext(mock_ClipObj);
-
-  // console.log("mock loadsounds");
-  // loadSounds(this, {
-  //   buffer1: 'techno.wav',
-  //   buffer2: 'song.mp3'
-  // }, onLoaded);
-  // function onLoaded() {
-  //   var button = document.querySelector('#toggleButton');
-  //   button.removeAttribute('disabled');
-  //   button.innerHTML = 'Play/pause';
-  // };
-
-  console.log("mock contexted");
-  mock_CreateBtn.style.backgroundColor = "#FF0000"
-  // mock_LoadSample("techno.wav", mock_Buffer);
-
-  // mock_BufferSource = mock_AudioCtx.createBufferSource();
-
-  // mock_BufferSource.onended() = function() {
-  //   console.log("mock ended");
-  //   mock_BufferSource[mock_BufferSource.stop ? 'stop' : 'noteOff'](0);
-  // }
-  // mock_BufferSource.buffer = mock_Buffer;
-  mock_GainNode = mock_AudioCtx.createGain();
-
-  mock_LowNode = mock_AudioCtx.createBiquadFilter();
-  mock_LowNode.type = "lowshelf";
-  mock_HighNode = mock_AudioCtx.createBiquadFilter();
-  mock_HighNode.type = "highshelf";
-
-  console.log("mock Created");
-
-  // connect oscillator to gain node to speakers
-  // mock_BufferSource.connect(mock_LowNode);
-  mock_LowNode.connect(mock_HighNode);
-  mock_HighNode.connect(mock_GainNode);
-  mock_GainNode.connect(mock_AudioCtx.destination);
-
-  console.log("mock Connected");
-
-  mock_GainNode.gain.value = 0.5;
-  mock_ChangeVolume(mock_VolSldr, mock_GainNode);
-
-  console.log("mock Volumed");
-
-  var audio = new Audio('1-second-of-silence.mp3');
-  audio.play();
-  console.log("mock kicked");
-
-  // report the state of the audio context to the
-  // console, when it changes
-  mock_AudioCtx.onstatechange = function() {
-    console.log(mock_AudioCtx.state);
-  }
+  mock_RainObj.statusLabel = mock_CreateBtn;
 }
 
-function mock_ListFiles(directory, fileList, phpFile, callbackFunc) {
+function mock_ListFiles(directory, fileList, phpFile, callbackFunc, obj) {
   $.ajax({
     type: 'POST',
     url: phpFile,
@@ -285,7 +271,7 @@ function mock_ListFiles(directory, fileList, phpFile, callbackFunc) {
       }
       fileList.array = result;
       console.log("mock ajax success");
-      callbackFunc(fileList, mock_BuffersLoaded, mock_FirstBufferLoaded, mock_ShowProgress);
+      callbackFunc(fileList, obj, mock_BuffersLoaded, mock_FirstBufferLoaded, mock_ShowProgress);
     },
     error: function(xhr){
       alert("mock An error occured POSTing '" + phpFile + "': " + xhr.status + " " + xhr.statusText);
@@ -294,19 +280,26 @@ function mock_ListFiles(directory, fileList, phpFile, callbackFunc) {
   });
 };
 
-function mock_LoadSounds(urlArray, loadFunc, firstLoadFunc, progressFunc) {
+function mock_LoadSounds(urlArray, obj, loadFunc, firstLoadFunc, progressFunc) {
   console.log("mock loading sounds");
-  console.log(mockListOfClipFiles);
 
   mock_BufferLoader = new BufferLoader(
-    mock_AudioCtx,
+    obj,
     urlArray.array,
     loadFunc,
     firstLoadFunc,
     progressFunc
   );
 
-  mock_BufferLoader.load(mock_CreateList);
+  var listElement = {
+    list: mock_SoundList
+  }
+  if (obj === mock_ClipObj) {
+    listElement.list = mock_ClipList;
+  }
+
+
+  mock_BufferLoader.load(mock_CreateList, listElement);
 };
 
 // function mock_LoadSample(url, soundVar) {
@@ -352,27 +345,27 @@ function mock_ChangeVolume(sliderElem, gainNodeElem) {
   gainNodeElem.gain.value = fraction * fraction;
 }
 
-function mock_MakeBuffer() {
-  mock_BufferSourceArray[0] = mock_AudioCtx.createBufferSource();
+function mock_MakeBuffer(obj) {
+  obj.bufferSources[0] = obj.audioCtx.createBufferSource();
   console.log("making buffer: " + mock_BufferIndex);
-  mock_BufferSourceArray[0].buffer = mock_BufferList[mock_BufferIndex];
+  obj.bufferSources[0].buffer = obj.buffers[mock_BufferIndex];
   mock_Ended = false;
-  mock_BufferSourceArray[0].connect(mock_LowNode);
-  let time = mock_AudioCtx.currentTime;
+  obj.bufferSources[0].connect(obj.lowNode);
+  let time = obj.audioCtx.currentTime;
   let mock_Delay = mock_Rate;
   let delayTime = time + mock_Delay;
 
-  mock_BufferSourceArray[0][mock_BufferSourceArray[0].start ? 'start' : 'noteOn'](delayTime);
+  obj.bufferSources[0][obj.bufferSources[0].start ? 'start' : 'noteOn'](delayTime);
   console.log("Now :" + time);
   console.log("Play:" + time + "+" + mock_Delay + "=" + delayTime);
-  mock_AudioCtx.suspend()
-  mock_BufferSourceArray[0].onended = function() {
+  obj.audioCtx.suspend()
+  obj.bufferSources[0].onended = function() {
     console.log("mock ended");
-    mock_AudioCtx.suspend()
+    obj.audioCtx.suspend()
     // mock_BufferSource[mock_BufferSource.stop ? 'stop' : 'noteOff'](0);
     mock_Ended = true;
   }
-  mock_BufferIndex = (mock_BufferIndex + 1) % mock_BufferList.length;
+  mock_BufferIndex = (mock_BufferIndex + 1) % obj.buffers.length;
 }
 
 function mock_GetRandomIntInclusive(min, max) {
@@ -433,14 +426,14 @@ mock_ToggleBtn.onclick = function () {
   //TODO Check if not currently playing
   if(mock_Ended)
   {
-    mock_MakeBuffer();
+    mock_MakeBuffer(mock_RainObj);
   }
-  if(mock_AudioCtx.state === 'running') {
-    mock_AudioCtx.suspend().then(function() {
+  if(mock_RainObj.audioCtx.state === 'running') {
+    mock_RainObj.audioCtx.suspend().then(function() {
       mock_ToggleBtn.textContent = 'Resume';
     });
-  } else if(mock_AudioCtx.state === 'suspended') {
-    mock_AudioCtx.resume().then(function() {
+  } else if(mock_RainObj.audioCtx.state === 'suspended') {
+    mock_RainObj.audioCtx.resume().then(function() {
       mock_ToggleBtn.textContent = 'Pause';
     });
   }
@@ -486,46 +479,41 @@ mock_StopBtn.onclick = function () {
 mock_VolSldr.oninput = function() {
   // SliderInput(this, mock_VolVal, mock_Volume);//, "writeValue.php", "/mock/volume.txt", "a+");
   mock_VolVal.innerHTML = mock_VolSldr.value;
-  mock_Volume = mock_VolSldr.value;
-  mock_ChangeVolume(this, mock_GainNode);
+  mock_RainObj.volume = mock_VolSldr.value;
+  mock_ChangeVolume(this, mock_RainObj.gainNode);
 }
 
-function mock_SliderInput(sliderElem, valueElem, variable, phpFile, outFile, fileMode) {
-  valueElem.innerHTML = sliderElem.value;
-  variable = sliderElem.value;
-  // if (typeof oscillator !== 'undefined') {
-  //   oscillator.frequency.value = variable; //freq
-  // }
-  // WriteValue(sliderElem.value, phpFile, outFile, fileMode);
-}
-
-function mock_SliderInput(sliderElem, valueElem) {
-  valueElem.innerHTML = sliderElem.value;
-  variable = sliderElem.value;
-}
-
-// mock_LowFreqSldr.oninput = function() {
-//   mock_LowFreqVal.innerHTML = mock_LowFreqSldr.value;
-//   mock_LowNode.frequency.value = mock_LowFreqSldr.value;
+// function mock_SliderInput(sliderElem, valueElem, variable, phpFile, outFile, fileMode) {
+//   valueElem.innerHTML = sliderElem.value;
+//   variable = sliderElem.value;
+//   // if (typeof oscillator !== 'undefined') {
+//   //   oscillator.frequency.value = variable; //freq
+//   // }
+//   // WriteValue(sliderElem.value, phpFile, outFile, fileMode);
 // }
+
+function mock_SliderInput(sliderElem, valueElem, gainNode) {
+  valueElem.innerHTML = sliderElem.value;
+  gainNode.gain.value = sliderElem.value;
+}
+
+
 mock_LowGainSldr.oninput = function() {
-  mock_LowGainVal.innerHTML = mock_LowGainSldr.value;
-  mock_LowNode.gain.value = mock_LowGainSldr.value;
+  mock_SliderInput(this, mock_LowGainVal, mock_RainObj.lowNode)
+  // mock_LowGainVal.innerHTML = mock_LowGainSldr.value;
+  // mock_RainObj.lowNode.gain.value = mock_LowGainSldr.value;
 }
 
-// mock_HighFreqSldr.oninput = function() {
-//   mock_HighFreqVal.innerHTML = mock_HighFreqSldr.value;
-//   mock_HighNode.frequency.value = mock_HighFreqSldr.value;
-// }
 mock_HighGainSldr.oninput = function() {
-  mock_HighGainVal.innerHTML = mock_HighGainSldr.value;
-  mock_HighNode.gain.value = mock_HighGainSldr.value;
+  mock_SliderInput(this, mock_HighGainVal, mock_RainObj.highNode)
+  // mock_HighGainVal.innerHTML = mock_HighGainSldr.value;
+  // mock_RainObj.highNode.gain.value = mock_HighGainSldr.value;
 }
 
 mock_ThreshFreqSldr.oninput = function() {
   mock_ThreshFreqVal.innerHTML = mock_ThreshFreqSldr.value;
-  mock_LowNode.frequency.value = mock_ThreshFreqSldr.value;
-  mock_HighNode.frequency.value = mock_ThreshFreqSldr.value;
+  mock_RainObj.lowNode.frequency.value = mock_ThreshFreqSldr.value;
+  mock_RainObj.highNode.frequency.value = mock_ThreshFreqSldr.value;
 }
 
 const mock_ScriptRainBtn = document.querySelector("#mockScriptRAIN");
@@ -556,4 +544,128 @@ mock_ScriptStopBtn.onclick = function () {
   this.innerHTML = "STOP1";
   mock_ScriptLabelBtn.style.backgroundColor = "#FF0000";
   WriteValue("test stop", "writeValue.php", "stop", "w+");
+}
+
+console.log(mock_ClipsHidden.querySelector(".freq"));
+
+const mock_ClipsHiddenFreqSldr = mock_ClipsHidden.querySelector(".freq").querySelector(".slider");
+
+mock_ClipsHiddenFreqSldr.oninput = function() {
+  mock_ClipsHidden.querySelector(".freq").querySelector(".val").innerHTML = this.value;
+}
+
+const mock_ClipsHiddenToggleBtn = mock_ClipsHidden.querySelector(".toggle");
+
+// let mock_ClipObj = {
+//   audioCtx: undefined,
+//   bufferSources: Array(),
+//   buffers: Array(),
+//   gainNode: undefined,
+//   lowNode: undefined,
+//   highNode: undefined,
+//   volume: undefined
+// }
+function CheckIfContextExists(obj) {
+  return obj.audioCtx != undefined;
+}
+
+function PlayClip(obj) {
+  console.log(obj.bufferSources);
+  if (obj.bufferSources.length == 0) {
+    ScheduleClip(obj);
+    ScheduleClip(obj, 5);
+  }
+}
+
+function ScheduleClip(obj, delay = 0) {
+  let soundSource = obj.audioCtx.createBufferSource();
+  soundSource.buffer = obj.buffers[mock_GetRandomIntInclusive(0,obj.buffers.length-1)];
+  soundSource.connect(obj.lowNode);
+  soundSource.onended = function() {
+    let thisIndex = obj.bufferSources.indexOf(this);
+    if (thisIndex != -1) {
+      obj.bufferSources.splice(thisIndex, 1);
+    }
+    ScheduleClip(obj);
+  }
+  let time = obj.audioCtx.currentTime + mock_GetRandomIntInclusive(0,mock_ClipsHiddenFreqSldr.value * 1) + delay;
+  soundSource[soundSource.start ? 'start' : 'noteOn'](time);
+
+  console.log((obj.bufferSources.length + 1) +" Scheduled a sound to play at: " + time);
+
+  obj.bufferSources.push(soundSource);
+}
+
+mock_ClipsHiddenToggleBtn.onclick = function () {
+  if (CheckIfContextExists(mock_ClipObj) == false) {
+    console.log("Initializing context");
+    mockDisplayTime(mockClipsTimeDisplay);
+    mock_InitializeContext(mock_ClipObj);
+    mock_ClipObj.lowNode.frequency = 440;
+    mock_ClipObj.midNode.frequency = 1000;
+    mock_ClipObj.midNode.Q = 1;
+    mock_ClipObj.highNode.frequency = 6000;
+    mock_ClipObj.isPlaying = false;
+    mock_ClipObj.statusLabel = mock_ClipsHiddenToggleBtn;
+    mock_ClipObj.audioCtx.suspend();
+  }
+  if (mock_ClipObj.buffers.length == 0) {
+    console.log("Gathering clip files");
+    const dir = "clips";
+    mock_ListFiles(dir, mockListOfClipFiles, "listFiles.php", mock_LoadSounds, mock_ClipObj);
+  }
+  else {
+    if (!mock_ClipObj.isPlaying) {
+      // mock_ClipObj.bufferSources[0] = mock_ClipObj.audioCtx.createBufferSource();
+      // mock_ClipObj.bufferSources[0].buffer = mock_ClipObj.buffers[mock_BufferIndex];
+      // mock_ClipObj.bufferSources[0].connect(mock_ClipObj.lowNode);
+      // mock_ClipObj.bufferSources[0][mock_ClipObj.bufferSources[0].start ? 'start' : 'noteOn'](0);
+      PlayClip(mock_ClipObj);
+      mock_ClipObj.audioCtx.resume().then(function() {
+        this.textContent = 'Pause';
+      }.bind(this));
+      mock_ClipObj.isPlaying = true;
+    // } else if(mock_ClipObj.audioCtx.state === 'running') {
+    } else if(mock_ClipObj.isPlaying) {
+  
+      // !!!!!!!!!!!!!!!!!Find out how to tell if a buffersource has ended!!!!!!!!!!!!!!
+      mock_ClipObj.bufferSources.forEach(function(e) {
+        e.onended = null;
+        e.stop();
+      });
+      mock_ClipObj.bufferSources.length = 0;
+      mock_ClipObj.audioCtx.suspend().then(function() {
+        this.textContent = 'Resume';
+      }.bind(this));
+      mock_ClipObj.isPlaying = false;
+    }
+  }
+}
+
+
+const mock_AdvancedLow = mock_ClipsAdvanced.querySelector(".low");
+const mock_AdvancedMid = mock_ClipsAdvanced.querySelector(".mid");
+const mock_AdvancedHigh = mock_ClipsAdvanced.querySelector(".high");
+const mock_AdvancedGain = mock_ClipsAdvanced.querySelector(".gain");
+mock_AdvancedLow.querySelector(".slider").oninput = function() {
+  // mock_AdvancedLow.querySelector(".val").innerHTML = this.value;
+  mock_SliderInput(this, mock_AdvancedLow.querySelector(".val"), mock_ClipObj.lowNode)
+}
+
+mock_AdvancedMid.querySelector(".slider").oninput = function() {
+  // mock_AdvancedHigh.querySelector(".val").innerHTML = this.value;
+  mock_SliderInput(this, mock_AdvancedMid.querySelector(".val"), mock_ClipObj.midNode)
+}
+mock_AdvancedHigh.querySelector(".slider").oninput = function() {
+  // mock_AdvancedHigh.querySelector(".val").innerHTML = this.value;
+  mock_SliderInput(this, mock_AdvancedHigh.querySelector(".val"), mock_ClipObj.highNode)
+}
+
+// mock_AdvancedThresh.querySelector(".slider").oninput = function() {
+//   mock_AdvancedThresh.querySelector(".val").innerHTML = this.value;
+// }
+
+mock_AdvancedGain.querySelector(".slider").oninput = function() {
+  mock_AdvancedGain.querySelector(".val").innerHTML = this.value;
+  mock_ChangeVolume(this, mock_ClipObj.gainNode);
 }

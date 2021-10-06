@@ -45,6 +45,12 @@
       <input name="volumeSldr" id='volumeSldr' type="range" min="0" max="100" value="50">
     </div>
     <div>
+      <label id="volumeLblLinear" for="volumeSldrLinear">Volume (Linear): </label>
+      <span id=volumeValLinear></span>
+      <br>
+      <input name="volumeSldrLinear" id='volumeSldrLinear' type="range" min="0" max="100" value="50">
+    </div>
+    <div>
       Pitch: <span id="sliderOutput"></span>
       <input type="range" min="0" max="200" value="100" id="testSlider">
     </div>
@@ -241,12 +247,14 @@
     <div>
       <button id="mockCreate">Create</button>
       <button id="mockLoad">Load</button>
-      <button id="mockToggle" disabled="true">Play</button>
-      <button id="mockStop" disabled="true">Stop</button>
+      <button id="mockToggle">Play</button>
+      <button id="mockStop">Stop</button>
       <br>
       <button id="mockScriptRAIN">RAIN</button>
       <button id="mockScriptSTOP">STOP</button>
       <button id="mockScriptLabel">Label</button>
+      <br>
+      <p id="mockTimeLabel">Current context time: No context exists.</p>
     </div>
 
     <div id=mockLow>
@@ -275,6 +283,51 @@
       <output id=mockVolVal for="mockVolSldr"></output>
       <br>
       <input id="mockVolSldr" name="mockVolSldr" type="range" min="-0" max="100" value="50">
+    </div>
+
+    <div id=mockClipsSection style="background-color:rgb(166, 166, 252);">
+      <button id="mockClipsToggle" onClick="{ let x = document.getElementById('mockClipsHidden'); if (!x.hidden) {x.hidden = true; this.innerHTML = 'Show';} else {x.hidden = false; this.innerHTML = 'Hide';}}">Show</button>
+      <div id=mockClipsHidden hidden>
+        <button class=toggle>Load</button>
+        <br>
+        <p id="mockClipsTimeLabel">Current context time: No context exists.</p>
+        <div class=freq>
+          <label class=label>Seconds between clips: </label>
+          <output class=val></output>
+          <br>
+          <input class=slider type="range" min="1" max="30" value="1">
+        </div>
+        <button id="mockClipsAdvancedToggle" onClick="{ let x = document.getElementById('mockClipsAdvanced'); if (!x.hidden) {x.hidden = true; this.innerHTML = 'Show';} else {x.hidden = false; this.innerHTML = 'Hide';}}">Show</button>
+        <div id=mockClipsAdvanced hidden>
+          <div class=low>
+            <label class=label>Lows: </label>
+            <span class=val></span>
+            <br>
+            <input class=slider type="range" min="-20" max="20" value="0">
+          </div>
+
+          <div class=mid>
+            <label class=label>Mids: </label>
+            <span class=val></span>
+            <br>
+            <input class=slider type="range" min="-20" max="20" value="0">
+          </div>
+
+          <div class=high>
+            <label class=label>Highs: </label>
+            <span class=val></span>
+            <br>
+            <input class=slider type="range" min="-20" max="20" value="0">
+          </div>
+
+          <div class=gain>
+            <label class=label>Volume: </label>
+            <output class=val></output>
+            <br>
+            <input class=slider type="range" min="-0" max="100" value="50">
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- STRETCH GOAL: Area to display all information related to a particular audio context. (state, clip name, etc) -->

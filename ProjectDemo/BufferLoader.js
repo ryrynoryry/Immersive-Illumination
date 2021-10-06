@@ -1,10 +1,11 @@
-function BufferLoader(context, urlList, loadFunc, firstLoadFunc, progressFunc) {
-  this.context = context;
+function BufferLoader(obj, urlList, loadFunc = function(){}, firstLoadFunc = function(){}, progressFunc = function(){}) {
+  this.obj = obj;
+  this.context = obj.audioCtx;
   this.urlList = urlList;
-  this.onload = loadFunc;
+  this.onLoad = loadFunc;
   this.onFirst = firstLoadFunc;
   this.onProgress = progressFunc;
-  this.bufferList = new Array();
+  this.bufferList = obj.buffers;
   this.loadCount = 0;
 }
 
@@ -16,7 +17,9 @@ BufferLoader.prototype.loadBuffer = function(url, index) {
 
   var loader = this;
 
-  request.onprogress = function (event) { loader.onProgress(event, loader.urlList, index); }
+  request.onprogress = function (event) {
+     loader.onProgress(event, loader.urlList, index);
+    }
 
   request.onload = function() {
     // Asynchronously decode the audio file data in request.response
@@ -31,10 +34,10 @@ BufferLoader.prototype.loadBuffer = function(url, index) {
         loader.bufferList[index] = buffer;
         // If all of the files have been loaded, call the callback function
         if (++loader.loadCount == loader.urlList.length) {
-          loader.onload(loader.bufferList);
+          loader.onLoad(loader.bufferList, loader.obj);
         }
         else if (loader.loadCount == 1) {
-          loader.onFirst(loader.bufferList[index]);
+          loader.onFirst(loader.bufferList[index], loader.obj);
         }
       },
       // Function to call on error
@@ -51,8 +54,8 @@ BufferLoader.prototype.loadBuffer = function(url, index) {
   request.send();
 }
 
-BufferLoader.prototype.load = function(func) {
-  func(this.urlList);
+BufferLoader.prototype.load = function(func = function(){}, arg1) {
+  func(this.urlList, arg1);
   for (var i = 0; i < this.urlList.length; ++i)
   this.loadBuffer(this.urlList[i], i);
 }
