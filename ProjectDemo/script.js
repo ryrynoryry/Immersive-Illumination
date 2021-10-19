@@ -4,16 +4,9 @@
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-let mock_AudioCtx;
-let mock_BufferSourceArray = new Array();
-let mock_Buffer;
-let mock_GainNode;
-let mock_Volume;
-let mock_BufferList = new Array();
 let mock_BufferIndex = 0;
 let mock_BufferLoader;
 let mock_Ended = true;
-let mock_Rate = 2;
 let mock_Stopped = true;
 
 
@@ -22,60 +15,60 @@ let mock_ClipObj = {
   audioCtx: undefined,
   bufferSources: Array(),
   buffers: Array(),
-  gainNode: undefined,
+  gainNode1: undefined,
+  gainNode2: undefined,
   lowNode: undefined,
   midNode: undefined,
   highNode: undefined,
   volume: undefined,
   isPlaying: false,
-  statusLabel: undefined
+  statusLabel: undefined,
+  prefix: "Clip",
+  sounds: Array()
 }
 
 let mock_RainObj = {
   audioCtx: undefined,
-  bufferSources: Array(),
-  buffers: Array(),
-  gainNode: undefined,
-  lowNode: undefined,
-  midNode: undefined,
-  highNode: undefined,
+  bufferSources: Array(), // WebAudio instances scheduled to play or playing
+  buffers: Array(), // Array of sound data from the files
+  gainNode1: undefined, // WebAudio object for this context's gain (volume)
+  gainNode2: undefined, // WebAudio object for this context's gain (volume)
+  lowNode: undefined, // WebAudio object for this context's low filter
+  midNode: undefined, // WebAudio object for this context's mid filter
+  highNode: undefined, // WebAudio object for this context's high filter
   volume: undefined,
-  isPlaying: false,
-  statusLabel: undefined
+  isPlaying: false, // Bool to indicate if sound is currently being produced
+  statusLabel: undefined, // Text object to show Play/Pause
+  prefix: "Rain",
+  sounds: Array()
 }
 
-let mock_LowNode;
-let mock_HighNode;
+let sound = {
+  parentObj: undefined,
+  duration: undefined,
+  fadeInStart: undefined,
+  fadeInEnd: undefined,
+  fadeOutStart: undefined,
+  fadeOutEnd: undefined,
+  buffersIndex: undefined,
+  bufferSourcesIndex: undefined,
+  gainNode: undefined,
+  isPlaying: false,
+}
 
 const mock_CreateBtn = document.querySelector("#mockCreate");
 const mock_LoadBtn = document.querySelector("#mockLoad");
 const mock_ToggleBtn = document.querySelector("#mockToggle");
 const mock_StopBtn = document.querySelector("#mockStop");
-
-const mock_RateSldr = document.querySelector("#mockRateSldr");
-let mock_RateVal = document.querySelector("#mockRateVal");
-
-const mock_LowFreqSldr = document.querySelector("#mockLowFreqSldr");
-let mock_LowFreqVal = document.querySelector("#mockLowFreqVal");
-const mock_LowGainSldr = document.querySelector("#mockLowGainSldr");
-let mock_LowGainVal = document.querySelector("#mockLowGainVal");
-
-const mock_HighFreqSldr = document.querySelector("#mockHighFreqSldr");
-let mock_HighFreqVal = document.querySelector("#mockHighFreqVal");
-const mock_HighGainSldr = document.querySelector("#mockHighGainSldr");
-let mock_HighGainVal = document.querySelector("#mockHighGainVal");
-
-const mock_ThreshFreqSldr = document.querySelector("#mockThreshFreqSldr");
-let mock_ThreshFreqVal = document.querySelector("#mockThreshFreqVal");
-
-const mock_VolSldr = document.querySelector("#mockVolSldr");
-let mock_VolVal = document.querySelector("#mockVolVal");
+const mock_LinBtn = document.querySelector("#mockLin");
+const mock_ExpBtn = document.querySelector("#mockExp");
 
 let mock_SoundList = document.querySelector("#mockSoundList");
 let mock_ClipList = document.querySelector("#mockClipList");
 
 let mock_ClipsHidden = document.querySelector("#mockClipsHidden");
 let mock_ClipsAdvanced = document.querySelector("#mockClipsAdvanced");
+let mock_MainSliders = document.querySelector("#mockMainSliders");
 
 let mockListOfSoundFiles = {array: new Array()};
 let mockListOfClipFiles = {array: new Array()};
@@ -144,119 +137,160 @@ function mock_FirstBufferLoaded(myBuffer, obj) {
   console.log("mock first buffer loaded: " + myBuffer);
 }
 
-mock_LoadBtn.onclick = function () {
-  // create web audio api context
-  console.log("mock load clicked");
-
-  const dir = "sounds";
-  mock_ListFiles(dir, mockListOfSoundFiles, "listFiles.php", mock_LoadSounds);
-
-
-  // console.log("mock loadsounds");
-  // loadSounds(this, {
-  //   buffer1: 'techno.wav',
-  //   buffer2: 'song.mp3'
-  // }, onLoaded);
-  // function onLoaded() {
-  //   var button = document.querySelector('#toggleButton');
-  //   button.removeAttribute('disabled');
-  //   button.innerHTML = 'Play/pause';
-  // };
-
-
-  AudioContext = window.AudioContext || window.webkitAudioContext;
-  mock_AudioCtx = new AudioContext();
-  console.log("mock contexted");
-  mock_CreateBtn.style.backgroundColor = "#FF0000"
-  // mock_LoadSample("techno.wav", mock_Buffer);
-
-  // mock_BufferSource = mock_AudioCtx.createBufferSource();
-
-  // mock_BufferSource.onended = function() {
-  //   console.log("mock ended");
-  //   mock_BufferSource[mock_BufferSource.stop ? 'stop' : 'noteOff'](0);
-  // }
-  // mock_BufferSource.buffer = mock_Buffer;
-  mock_GainNode = mock_AudioCtx.createGain();
-
-  mock_LowNode = mock_AudioCtx.createBiquadFilter();
-  mock_LowNode.type = "lowshelf";
-  mock_HighNode = mock_AudioCtx.createBiquadFilter();
-  mock_HighNode.type = "highshelf";
-
-  console.log("mock Created");
-
-  // connect oscillator to gain node to speakers
-  // mock_BufferSource.connect(mock_LowNode);
-  mock_LowNode.connect(mock_HighNode);
-  mock_HighNode.connect(mock_GainNode);
-  mock_GainNode.connect(mock_AudioCtx.destination);
-
-  console.log("mock Connected");
-
-  mock_GainNode.gain.value = 0.5;
-  mock_ChangeVolume(mock_VolSldr, mock_GainNode);
-
-  console.log("mock Volumed");
-
-  var audio = new Audio('1-second-of-silence.mp3');
-  audio.play();
-  console.log("mock kicked");
-
-  // report the state of the audio context to the
-  // console, when it changes
-  mock_AudioCtx.onstatechange = function() {
-    console.log(mock_AudioCtx.state);
-  }
-}
-
-// let mock_ClipObj = {
-//   audioCtx: undefined,
-//   bufferSources: Array(),
-//   buffers: Array(),
-//   gainNode: undefined,
-//   lowNode: undefined,
-//   highNode: undefined,
-//   volume: undefined
-// }
 function mock_InitializeContext(obj) {
   AudioContext = window.AudioContext || window.webkitAudioContext;
   obj.audioCtx = new AudioContext();
-  obj.gainNode = obj.audioCtx.createGain();
+  obj.gainNode1 = obj.audioCtx.createGain();
+  obj.gainNode2 = obj.audioCtx.createGain();
 
   obj.lowNode = obj.audioCtx.createBiquadFilter();
   obj.lowNode.type = "lowshelf";
+  obj.lowNode.frequency = 440;
   obj.midNode = obj.audioCtx.createBiquadFilter();
   obj.midNode.type = "peaking";
+  obj.midNode.frequency = 1000;
+  obj.midNode.Q = 1;
   obj.highNode = obj.audioCtx.createBiquadFilter();
   obj.highNode.type = "highshelf";
+  obj.highNode.frequency = 6000;
 
+  obj.gainNode1.connect(obj.lowNode);
+  obj.gainNode2.connect(obj.lowNode);
   obj.lowNode.connect(obj.midNode);
   obj.midNode.connect(obj.highNode);
-  obj.highNode.connect(obj.gainNode);
-  obj.gainNode.connect(obj.audioCtx.destination);
+  obj.highNode.connect(obj.audioCtx.destination);
 
-  obj.gainNode.gain.value = 0.5;
+  obj.gainNode1.gain.value = 1.0;
+  obj.gainNode2.gain.value = 1.0;
 
-  var audio = new Audio('1-second-of-silence.mp3');
+  var audio = new Audio('silence/1-second-of-silence.mp3');
   audio.play();
 
   obj.audioCtx.onstatechange = function() {
-    console.log(obj.audioCtx.state);
+    console.log(obj.prefix + " Context: " + obj.audioCtx.state);
   }
 }
 
+mock_LinBtn.onclick = function() {
+  mock_RainObj.gainNode1.gain.cancelScheduledValues(mock_RainObj.audioCtx.currentTime);
+  let gainVal = mock_RainObj.gainNode1.gain.value;
+  mock_RainObj.gainNode1.gain.setValueAtTime(gainVal, mock_RainObj.audioCtx.currentTime);
+  mock_RainObj.gainNode1.gain.linearRampToValueAtTime(1.0, mock_RainObj.audioCtx.currentTime + 2);
+  mock_RainObj.gainNode1.gain.linearRampToValueAtTime(0.0, mock_RainObj.audioCtx.currentTime + 4);
+  mock_RainObj.gainNode1.gain.linearRampToValueAtTime(1.0, mock_RainObj.audioCtx.currentTime + 6);
+  mock_RainObj.gainNode1.gain.linearRampToValueAtTime(0.0, mock_RainObj.audioCtx.currentTime + 8);
+  mock_RainObj.gainNode1.gain.linearRampToValueAtTime(gainVal, mock_RainObj.audioCtx.currentTime + 10);
+}
+
+mock_ExpBtn.onclick = function() {
+  mock_RainObj.gainNode1.gain.cancelScheduledValues(mock_RainObj.audioCtx.currentTime);
+  let gainVal = mock_RainObj.gainNode1.gain.value;
+  mock_RainObj.gainNode1.gain.setValueAtTime(gainVal, mock_RainObj.audioCtx.currentTime);
+  mock_RainObj.gainNode1.gain.exponentialRampToValueAtTime(1.0, mock_RainObj.audioCtx.currentTime + 2);
+  mock_RainObj.gainNode1.gain.exponentialRampToValueAtTime(0.01, mock_RainObj.audioCtx.currentTime + 4);
+  mock_RainObj.gainNode1.gain.exponentialRampToValueAtTime(1.0, mock_RainObj.audioCtx.currentTime + 6);
+  mock_RainObj.gainNode1.gain.exponentialRampToValueAtTime(0.01, mock_RainObj.audioCtx.currentTime + 8);
+  mock_RainObj.gainNode1.gain.exponentialRampToValueAtTime(gainVal, mock_RainObj.audioCtx.currentTime + 10);
+}
+
+function PlaySound(obj) {
+  if (obj.bufferSources.length == 0) {
+    ScheduleSound(obj, 0, 0);
+    ScheduleSound(obj, 0, obj.buffers[0].duration - (obj.buffers[0].duration / 10));
+  }
+}
+// var currTime = context.currentTime;
+// for (var i = 0; i < iterations; i++) {
+//   // For each buffer, schedule its playback in the future.
+//   for (var j = 0; j < buffers.length; j++) {
+//     var buffer = buffers[j];
+//     var duration = buffer.duration;
+//     var info = createSource(buffer);
+//     var source = info.source;
+//     var gainNode = info.gainNode;
+//     // Fade it in.
+//     gainNode.gain.linearRampToValueAtTime(0, currTime);
+//     gainNode.gain.linearRampToValueAtTime(1, currTime + fadeTime);
+//     // Then fade it out.
+//     gainNode.gain.linearRampToValueAtTime(1, currTime + duration-fadeTime);
+//     gainNode.gain.linearRampToValueAtTime(0, currTime + duration); // exponentialRampToValueAtTime
+
+//     // Play the track now.
+//     source[source.start ? 'start' : 'noteOn'](currTime);
+
+//     // Increment time for the next iteration.
+//     currTime += duration - fadeTime;
+//   }
+// }
+
+// CrossfadeSample.prototype.crossfade = function(element) {
+//   var x = parseInt(element.value) / parseInt(element.max);
+//   // Use an equal-power crossfading curve:
+//   var gain1 = Math.cos(x * 0.5*Math.PI);
+//   var gain2 = Math.cos((1.0 - x) * 0.5*Math.PI);
+//   this.ctl1.gainNode.gain.value = gain1;
+//   this.ctl2.gainNode.gain.value = gain2;
+// };
+
+function ScheduleSound(obj, index, delay = 0) {
+  let soundSource = obj.audioCtx.createBufferSource();
+  // soundSource.buffer = obj.buffers[mock_GetRandomIntInclusive(0,obj.buffers.length-1)];
+  soundSource.buffer = obj.buffers[index];
+  if (obj.bufferSources.length % 2 == 0) {
+    soundSource.connect(obj.gainNode1);
+  }
+  else {
+    soundSource.connect(obj.gainNode2);
+  }
+  soundSource.onended = function() {
+    let thisIndex = obj.bufferSources.indexOf(this);
+    let duration = this.buffer.duration;//obj.bufferSources[thisIndex].buffer.duration
+    if (thisIndex != -1) {
+      obj.bufferSources.splice(thisIndex, 1);
+    }
+    var nextIndex = (index >= (obj.buffers.length - 1) ? 0 : index + 1);
+    ScheduleSound(obj, nextIndex, duration - (duration / 10));
+  }
+  let time = obj.audioCtx.currentTime + delay;
+  soundSource[soundSource.start ? 'start' : 'noteOn'](time);
+
+  console.log(obj.prefix + " Buf Length: " + (obj.bufferSources.length + 1) +" Scheduled a sound to play at: " + time);
+
+  obj.bufferSources.push(soundSource);
+}
 
 mock_CreateBtn.onclick = function () {
-  // create web audio api context
-  console.log("mock clicked");
+  if (CheckIfContextExists(mock_RainObj) == false) {
+    console.log(mock_RainObj.prefix + " Initializing context");
 
-  const dir = "sounds";
-  mock_ListFiles(dir, mockListOfSoundFiles, "listFiles.php", mock_LoadSounds, mock_RainObj);
-  mockDisplayTime(mockRainTimeDisplay);
-  mock_InitializeContext(mock_RainObj);
-
-  mock_RainObj.statusLabel = mock_CreateBtn;
+    mockDisplayTime(mockRainTimeDisplay);
+    mock_InitializeContext(mock_RainObj);
+    mock_RainObj.isPlaying = false;
+    mock_RainObj.statusLabel = mock_CreateBtn;
+    mock_RainObj.audioCtx.suspend();
+  }
+  if (mock_RainObj.buffers.length == 0) {
+    console.log(mock_RainObj.prefix + " Gathering files");
+    const dir = "sounds";
+    mock_ListFiles(dir, mockListOfSoundFiles, "listFiles.php", mock_LoadSounds, mock_RainObj);
+  }
+  else {
+    if (!mock_RainObj.isPlaying) {
+      PlaySound(mock_RainObj);
+      mock_RainObj.audioCtx.resume().then(function() {
+        this.textContent = 'Pause';
+      }.bind(this));
+      mock_RainObj.isPlaying = true;
+    // } else if(mock_ClipObj.audioCtx.state === 'running') {
+    } else if(mock_RainObj.isPlaying) {
+  
+      // !!!!!!!!!!!!!!!!!Find out how to tell if a buffersource has ended!!!!!!!!!!!!!!
+      mock_RainObj.audioCtx.suspend().then(function() {
+        this.textContent = 'Resume';
+      }.bind(this));
+      mock_RainObj.isPlaying = false;
+    }
+  }
 }
 
 function mock_ListFiles(directory, fileList, phpFile, callbackFunc, obj) {
@@ -270,18 +304,19 @@ function mock_ListFiles(directory, fileList, phpFile, callbackFunc, obj) {
         alert("No files found in directory: '" + directory + "'");
       }
       fileList.array = result;
-      console.log("mock ajax success");
+      console.log(obj.prefix + " ajax success");
+
       callbackFunc(fileList, obj, mock_BuffersLoaded, mock_FirstBufferLoaded, mock_ShowProgress);
     },
     error: function(xhr){
-      alert("mock An error occured POSTing '" + phpFile + "': " + xhr.status + " " + xhr.statusText);
+      alert(obj.prefix + " mock An error occured POSTing '" + phpFile + "': " + xhr.status + " " + xhr.statusText);
     },
     dataType: "json"
   });
 };
 
 function mock_LoadSounds(urlArray, obj, loadFunc, firstLoadFunc, progressFunc) {
-  console.log("mock loading sounds");
+  console.log(obj.prefix + " loading sounds");
 
   mock_BufferLoader = new BufferLoader(
     obj,
@@ -347,20 +382,20 @@ function mock_ChangeVolume(sliderElem, gainNodeElem) {
 
 function mock_MakeBuffer(obj) {
   obj.bufferSources[0] = obj.audioCtx.createBufferSource();
-  console.log("making buffer: " + mock_BufferIndex);
+  console.log(obj.prefix + " making buffer: " + mock_BufferIndex);
   obj.bufferSources[0].buffer = obj.buffers[mock_BufferIndex];
   mock_Ended = false;
-  obj.bufferSources[0].connect(obj.lowNode);
+  obj.bufferSources[0].connect(obj.gainNode1);
   let time = obj.audioCtx.currentTime;
   let mock_Delay = mock_Rate;
   let delayTime = time + mock_Delay;
 
   obj.bufferSources[0][obj.bufferSources[0].start ? 'start' : 'noteOn'](delayTime);
-  console.log("Now :" + time);
-  console.log("Play:" + time + "+" + mock_Delay + "=" + delayTime);
+  console.log(obj.prefix + " Now :" + time);
+  console.log(obj.prefix + " Play:" + time + "+" + mock_Delay + "=" + delayTime);
   obj.audioCtx.suspend()
   obj.bufferSources[0].onended = function() {
-    console.log("mock ended");
+    console.log(obj.prefix + " mock ended");
     obj.audioCtx.suspend()
     // mock_BufferSource[mock_BufferSource.stop ? 'stop' : 'noteOff'](0);
     mock_Ended = true;
@@ -385,10 +420,10 @@ function mock_MakeBufferRand() {
 
   mock_BufferSourceArray[0].buffer = mock_BufferList[index];
   mock_BufferSourceArray[0].connect(mock_LowNode);
-  console.log(index + " Before: " + mock_AudioCtx.currentTime);
+  console.log(obj.prefix + " " + index + " Before: " + mock_AudioCtx.currentTime);
   mock_BufferSourceArray[0][mock_BufferSourceArray[0].start ? 'start' : 'noteOn'](mock_AudioCtx.currentTime);
   mock_BufferSourceArray[0].onended = function() {
-    console.log(index + " After: " + mock_AudioCtx.currentTime);
+    console.log(obj.prefix + " " + index + " After: " + mock_AudioCtx.currentTime);
   }
 }
 
@@ -471,18 +506,6 @@ mock_StopBtn.onclick = function () {
   mock_StartBtn.removeAttribute('disabled');
 }
 
-// mock_RateSldr.oninput = function() {
-//   mock_RateVal.innerHTML = mock_RateSldr.value;
-//   mock_Rate = mock_RateSldr.value * 1;
-// }
-
-mock_VolSldr.oninput = function() {
-  // SliderInput(this, mock_VolVal, mock_Volume);//, "writeValue.php", "/mock/volume.txt", "a+");
-  mock_VolVal.innerHTML = mock_VolSldr.value;
-  mock_RainObj.volume = mock_VolSldr.value;
-  mock_ChangeVolume(this, mock_RainObj.gainNode);
-}
-
 // function mock_SliderInput(sliderElem, valueElem, variable, phpFile, outFile, fileMode) {
 //   valueElem.innerHTML = sliderElem.value;
 //   variable = sliderElem.value;
@@ -497,23 +520,34 @@ function mock_SliderInput(sliderElem, valueElem, gainNode) {
   gainNode.gain.value = sliderElem.value;
 }
 
+const mock_MainLow  = mock_MainSliders.querySelector(".low");
+const mock_MainMid  = mock_MainSliders.querySelector(".mid");
+const mock_MainHigh = mock_MainSliders.querySelector(".high");
+const mock_MainGain = mock_MainSliders.querySelector(".gain");
+const mock_MainGain2 = mock_MainSliders.querySelector(".gain2");
 
-mock_LowGainSldr.oninput = function() {
-  mock_SliderInput(this, mock_LowGainVal, mock_RainObj.lowNode)
-  // mock_LowGainVal.innerHTML = mock_LowGainSldr.value;
-  // mock_RainObj.lowNode.gain.value = mock_LowGainSldr.value;
+mock_MainLow.querySelector(".slider").oninput = function() {
+  // mock_MainLow.querySelector(".val").innerHTML = this.value;
+  mock_SliderInput(this, mock_MainLow.querySelector(".val"), mock_RainObj.lowNode)
 }
 
-mock_HighGainSldr.oninput = function() {
-  mock_SliderInput(this, mock_HighGainVal, mock_RainObj.highNode)
-  // mock_HighGainVal.innerHTML = mock_HighGainSldr.value;
-  // mock_RainObj.highNode.gain.value = mock_HighGainSldr.value;
+mock_MainMid.querySelector(".slider").oninput = function() {
+  // mock_MainMid.querySelector(".val").innerHTML = this.value;
+  mock_SliderInput(this, mock_MainMid.querySelector(".val"), mock_RainObj.midNode)
+}
+mock_MainHigh.querySelector(".slider").oninput = function() {
+  // mock_MainHigh.querySelector(".val").innerHTML = this.value;
+  mock_SliderInput(this, mock_MainHigh.querySelector(".val"), mock_RainObj.highNode)
 }
 
-mock_ThreshFreqSldr.oninput = function() {
-  mock_ThreshFreqVal.innerHTML = mock_ThreshFreqSldr.value;
-  mock_RainObj.lowNode.frequency.value = mock_ThreshFreqSldr.value;
-  mock_RainObj.highNode.frequency.value = mock_ThreshFreqSldr.value;
+mock_MainGain.querySelector(".slider").oninput = function() {
+  mock_MainGain.querySelector(".val").innerHTML = this.value;
+  mock_ChangeVolume(this, mock_RainObj.gainNode1);
+}
+
+mock_MainGain2.querySelector(".slider").oninput = function() {
+  mock_MainGain2.querySelector(".val").innerHTML = this.value;
+  mock_ChangeVolume(this, mock_RainObj.gainNode2);
 }
 
 const mock_ScriptRainBtn = document.querySelector("#mockScriptRAIN");
@@ -546,7 +580,6 @@ mock_ScriptStopBtn.onclick = function () {
   WriteValue("test stop", "writeValue.php", "stop", "w+");
 }
 
-console.log(mock_ClipsHidden.querySelector(".freq"));
 
 const mock_ClipsHiddenFreqSldr = mock_ClipsHidden.querySelector(".freq").querySelector(".slider");
 
@@ -570,7 +603,6 @@ function CheckIfContextExists(obj) {
 }
 
 function PlayClip(obj) {
-  console.log(obj.bufferSources);
   if (obj.bufferSources.length == 0) {
     ScheduleClip(obj);
     ScheduleClip(obj, 5);
@@ -580,7 +612,7 @@ function PlayClip(obj) {
 function ScheduleClip(obj, delay = 0) {
   let soundSource = obj.audioCtx.createBufferSource();
   soundSource.buffer = obj.buffers[mock_GetRandomIntInclusive(0,obj.buffers.length-1)];
-  soundSource.connect(obj.lowNode);
+  soundSource.connect(obj.gainNode1);
   soundSource.onended = function() {
     let thisIndex = obj.bufferSources.indexOf(this);
     if (thisIndex != -1) {
@@ -591,26 +623,22 @@ function ScheduleClip(obj, delay = 0) {
   let time = obj.audioCtx.currentTime + mock_GetRandomIntInclusive(0,mock_ClipsHiddenFreqSldr.value * 1) + delay;
   soundSource[soundSource.start ? 'start' : 'noteOn'](time);
 
-  console.log((obj.bufferSources.length + 1) +" Scheduled a sound to play at: " + time);
+  console.log(obj.prefix + " Buf Length: " + (obj.bufferSources.length + 1) +" Scheduled a sound to play at: " + time);
 
   obj.bufferSources.push(soundSource);
 }
 
 mock_ClipsHiddenToggleBtn.onclick = function () {
   if (CheckIfContextExists(mock_ClipObj) == false) {
-    console.log("Initializing context");
+    console.log(mock_ClipObj.prefix + " Initializing context");
     mockDisplayTime(mockClipsTimeDisplay);
     mock_InitializeContext(mock_ClipObj);
-    mock_ClipObj.lowNode.frequency = 440;
-    mock_ClipObj.midNode.frequency = 1000;
-    mock_ClipObj.midNode.Q = 1;
-    mock_ClipObj.highNode.frequency = 6000;
     mock_ClipObj.isPlaying = false;
     mock_ClipObj.statusLabel = mock_ClipsHiddenToggleBtn;
     mock_ClipObj.audioCtx.suspend();
   }
   if (mock_ClipObj.buffers.length == 0) {
-    console.log("Gathering clip files");
+    console.log(mock_ClipObj.prefix + " Gathering clip files");
     const dir = "clips";
     mock_ListFiles(dir, mockListOfClipFiles, "listFiles.php", mock_LoadSounds, mock_ClipObj);
   }
@@ -667,5 +695,5 @@ mock_AdvancedHigh.querySelector(".slider").oninput = function() {
 
 mock_AdvancedGain.querySelector(".slider").oninput = function() {
   mock_AdvancedGain.querySelector(".val").innerHTML = this.value;
-  mock_ChangeVolume(this, mock_ClipObj.gainNode);
+  mock_ChangeVolume(this, mock_ClipObj.gainNode1);
 }

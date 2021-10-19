@@ -249,6 +249,8 @@
       <button id="mockLoad">Load</button>
       <button id="mockToggle">Play</button>
       <button id="mockStop">Stop</button>
+      <button id="mockLin">Linear</button>
+      <button id="mockExp">Expon</button>
       <br>
       <button id="mockScriptRAIN">RAIN</button>
       <button id="mockScriptSTOP">STOP</button>
@@ -257,32 +259,41 @@
       <p id="mockTimeLabel">Current context time: No context exists.</p>
     </div>
 
-    <div id=mockLow>
-      <label id="mockLowGainLbl" for="mockLowGainLbl">Lows: </label>
-      <span id=mockLowGainVal></span>
-      <br>
-      <input id="mockLowGainSldr" name="mockLowGainSldr" type="range" min="-20" max="20" value="0">
-    </div>
+    <div id=mockMainSliders>
+      <div class=low>
+        <label class=label>Lows: </label>
+        <span class=val></span>
+        <br>
+        <input class=slider type="range" min="-20" max="20" value="0">
+      </div>
 
-    <div id=mockHigh>
-      <label id="mockHighGainLbl" for="mockHighGainLbl">Highs: </label>
-      <span id=mockHighGainVal></span>
-      <br>
-      <input id="mockHighGainSldr" name="mockHighGainSldr" type="range" min="-20" max="20" value="0">
-    </div>
+      <div class=mid>
+        <label class=label>Mids: </label>
+        <span class=val></span>
+        <br>
+        <input class=slider type="range" min="-20" max="20" value="0">
+      </div>
 
-    <div id=mockThresh>
-      <label id="mockThreshFreqLbl" for="mockThreshFreqLbl">Frequency: </label>
-      <span id=mockThreshFreqVal></span>
-      <br>
-      <input id="mockThreshFreqSldr" name="mockThreshFreqSldr" type="range" min="300" max="10000" value="300">
-    </div>
+      <div class=high>
+        <label class=label>Highs: </label>
+        <span class=val></span>
+        <br>
+        <input class=slider type="range" min="-20" max="20" value="0">
+      </div>
 
-    <div id=mockGain>
-      <label id="mockVolLbl" for="mockVolLbl">Volume: </label>
-      <output id=mockVolVal for="mockVolSldr"></output>
-      <br>
-      <input id="mockVolSldr" name="mockVolSldr" type="range" min="-0" max="100" value="50">
+      <div class=gain>
+        <label class=label>Volume: </label>
+        <output class=val></output>
+        <br>
+        <input class=slider type="range" min="-0" max="100" value="100">
+      </div>
+
+      <div class=gain2>
+        <label class=label>Volume2: </label>
+        <output class=val></output>
+        <br>
+        <input class=slider type="range" min="-0" max="100" value="100">
+      </div>
     </div>
 
     <div id=mockClipsSection style="background-color:rgb(166, 166, 252);">
