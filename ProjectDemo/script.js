@@ -13,7 +13,6 @@ let mock_Stopped = true;
 // TODO: Use these variables instead
 let mock_ClipObj = {
   audioCtx: undefined,
-  bufferSources: Array(),
   buffers: Array(),
   gainNode1: undefined,
   gainNode2: undefined,
@@ -29,7 +28,7 @@ let mock_ClipObj = {
 
 let mock_RainObj = {
   audioCtx: undefined,
-  bufferSources: Array(), // WebAudio instances scheduled to play or playing
+  // bufferSources: Array(), // WebAudio instances scheduled to play or playing
   buffers: Array(), // Array of sound data from the files
   gainNode1: undefined, // WebAudio object for this context's gain (volume)
   gainNode2: undefined, // WebAudio object for this context's gain (volume)
@@ -51,7 +50,6 @@ let Sound = {
   fadeOutStart: undefined,
   fadeOutEnd: undefined,
   buffersIndex: undefined,
-  bufferSourcesIndex: undefined,
   bufferSource: undefined,
   gainNode: undefined,
   isPlaying: false,
@@ -195,7 +193,7 @@ mock_ExpBtn.onclick = function() {
 }
 
 function PlaySound(obj) {
-  if (obj.bufferSources.length == 0) {
+  if (obj.sounds.length == 0) {
     ScheduleSound(obj, 0, 0, 1);
     ScheduleSound(obj, 1, obj.buffers[0].duration * 0.8, 2);
     // ScheduleSound(obj, 0, obj.buffers[0].duration - (obj.buffers[0].duration / 10));
@@ -251,13 +249,14 @@ function ScheduleSound(obj, index, delay = 0, gain = 1) {
   sound.bufferSource.connect(sound.gainNode);
 
   sound.bufferSource.onended = function() {
-    let thisIndex = obj.bufferSources.indexOf(this);
-    let duration = this.buffer.duration;//obj.bufferSources[thisIndex].buffer.duration
+    let thisIndex = obj.sounds.indexOf(sound);
     //TODO: Need to use the duration of the other buffer.
     if (thisIndex != -1) {
-      obj.bufferSources.splice(thisIndex, 1);
       obj.sounds.splice(thisIndex, 1);
     }
+
+    let duration = obj.sounds[thisIndex].duration
+
     var nextIndex = (index >= (obj.buffers.length - 1) ? 0 : index + 1);
     ScheduleSound(obj, nextIndex, obj.sounds[0].duration * 0.6, gain);
   }
@@ -276,10 +275,9 @@ function ScheduleSound(obj, index, delay = 0, gain = 1) {
 
   sound.bufferSource[sound.bufferSource.start ? 'start' : 'noteOn'](sound.fadeInStart);
 
-  console.log(obj.prefix + " Buf Length: " + (obj.bufferSources.length + 1) + " GainNode: " + gain + " Scheduled a sound to play at: " + (sound.fadeInStart));
+  console.log(obj.prefix + " Buf Length: " + (obj.sounds.length + 1) + " GainNode: " + gain + " Scheduled a sound to play at: " + (sound.fadeInStart));
   console.log("In: " + sound.fadeInStart.toFixed(3) + ", " + sound.fadeInEnd.toFixed(3) + "\nOut: " + sound.fadeOutStart.toFixed(3) + ", " + sound.fadeOutEnd.toFixed(3));
 
-  obj.bufferSources.push(sound.bufferSource);
   obj.sounds.push(sound);
 }
 
@@ -408,20 +406,20 @@ function mock_ChangeVolume(sliderElem, gainNodeElem, obj = undefined) {
 }
 
 function mock_MakeBuffer(obj) {
-  obj.bufferSources[0] = obj.audioCtx.createBufferSource();
+  obj.sounds[0].bufferSource = obj.audioCtx.createBufferSource();
   console.log(obj.prefix + " making buffer: " + mock_BufferIndex);
-  obj.bufferSources[0].buffer = obj.buffers[mock_BufferIndex];
+  obj.sounds[0].bufferSource.buffer = obj.buffers[mock_BufferIndex];
   mock_Ended = false;
-  obj.bufferSources[0].connect(obj.gainNode1);
+  obj.sounds[0].bufferSource.connect(obj.gainNode1);
   let time = obj.audioCtx.currentTime;
   let mock_Delay = mock_Rate;
   let delayTime = time + mock_Delay;
 
-  obj.bufferSources[0][obj.bufferSources[0].start ? 'start' : 'noteOn'](delayTime);
+  obj.sounds[0].bufferSource[obj.sounds[0].bufferSource.start ? 'start' : 'noteOn'](delayTime);
   console.log(obj.prefix + " Now :" + time);
   console.log(obj.prefix + " Play:" + time + "+" + mock_Delay + "=" + delayTime);
   obj.audioCtx.suspend()
-  obj.bufferSources[0].onended = function() {
+  obj.sounds[0].bufferSource.onended = function() {
     console.log(obj.prefix + " mock ended");
     obj.audioCtx.suspend()
     // mock_BufferSource[mock_BufferSource.stop ? 'stop' : 'noteOff'](0);
@@ -630,29 +628,30 @@ function CheckIfContextExists(obj) {
 }
 
 function PlayClip(obj) {
-  if (obj.bufferSources.length == 0) {
+  if (obj.sounds.length == 0) {
     ScheduleClip(obj);
     ScheduleClip(obj, 5);
   }
 }
 
 function ScheduleClip(obj, delay = 0) {
-  let soundSource = obj.audioCtx.createBufferSource();
-  soundSource.buffer = obj.buffers[mock_GetRandomIntInclusive(0,obj.buffers.length-1)];
-  soundSource.connect(obj.gainNode1);
-  soundSource.onended = function() {
-    let thisIndex = obj.bufferSources.indexOf(this);
+  let sound = new Object();
+  sound.buffersource = obj.audioCtx.createBufferSource();
+  sound.buffersource.buffer = obj.buffers[mock_GetRandomIntInclusive(0,obj.buffers.length-1)];
+  sound.buffersource.connect(obj.gainNode1);
+  sound.buffersource.onended = function() {
+    let thisIndex = obj.sounds.indexOf(sound);
     if (thisIndex != -1) {
-      obj.bufferSources.splice(thisIndex, 1);
+      obj.sounds.splice(thisIndex, 1);
     }
     ScheduleClip(obj);
   }
   let time = obj.audioCtx.currentTime + mock_GetRandomIntInclusive(0,mock_ClipsHiddenFreqSldr.value * 1) + delay;
-  soundSource[soundSource.start ? 'start' : 'noteOn'](time);
+  sound.buffersource[sound.buffersource.start ? 'start' : 'noteOn'](time);
 
-  console.log(obj.prefix + " Buf Length: " + (obj.bufferSources.length + 1) +" Scheduled a sound to play at: " + time);
+  console.log(obj.prefix + " Buf Length: " + (obj.sounds.length + 1) +" Scheduled a sound to play at: " + time);
 
-  obj.bufferSources.push(soundSource);
+  obj.sounds.push(sound);
 }
 
 mock_ClipsHiddenToggleBtn.onclick = function () {
@@ -671,10 +670,10 @@ mock_ClipsHiddenToggleBtn.onclick = function () {
   }
   else {
     if (!mock_ClipObj.isPlaying) {
-      // mock_ClipObj.bufferSources[0] = mock_ClipObj.audioCtx.createBufferSource();
-      // mock_ClipObj.bufferSources[0].buffer = mock_ClipObj.buffers[mock_BufferIndex];
-      // mock_ClipObj.bufferSources[0].connect(mock_ClipObj.lowNode);
-      // mock_ClipObj.bufferSources[0][mock_ClipObj.bufferSources[0].start ? 'start' : 'noteOn'](0);
+      // mock_ClipObj.sounds[0].buffersource = mock_ClipObj.audioCtx.createBufferSource();
+      // mock_ClipObj.sounds[0].buffersource.buffer = mock_ClipObj.buffers[mock_BufferIndex];
+      // mock_ClipObj.sounds[0].buffersource.connect(mock_ClipObj.lowNode);
+      // mock_ClipObj.sounds[0].buffersource[mock_ClipObj.sounds[0].buffersource.start ? 'start' : 'noteOn'](0);
       PlayClip(mock_ClipObj);
       mock_ClipObj.audioCtx.resume().then(function() {
         this.textContent = 'Pause';
@@ -684,11 +683,11 @@ mock_ClipsHiddenToggleBtn.onclick = function () {
     } else if(mock_ClipObj.isPlaying) {
   
       // !!!!!!!!!!!!!!!!!Find out how to tell if a buffersource has ended!!!!!!!!!!!!!!
-      mock_ClipObj.bufferSources.forEach(function(e) {
-        e.onended = null;
-        e.stop();
+      mock_ClipObj.sounds.forEach(function(e) {
+        e.buffersource.onended = null;
+        e.buffersource.stop();
       });
-      mock_ClipObj.bufferSources.length = 0;
+      mock_ClipObj.sounds.length = 0;
       mock_ClipObj.audioCtx.suspend().then(function() {
         this.textContent = 'Resume';
       }.bind(this));
