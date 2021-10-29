@@ -43,7 +43,7 @@ let mock_RainObj = {
   sounds: Array()
 }
 
-let sound = {
+let Sound = {
   parentObj: undefined,
   duration: undefined,
   fadeInStart: undefined,
@@ -52,6 +52,7 @@ let sound = {
   fadeOutEnd: undefined,
   buffersIndex: undefined,
   bufferSourcesIndex: undefined,
+  bufferSource: undefined,
   gainNode: undefined,
   isPlaying: false,
 }
@@ -195,8 +196,9 @@ mock_ExpBtn.onclick = function() {
 
 function PlaySound(obj) {
   if (obj.bufferSources.length == 0) {
-    ScheduleSound(obj, 0, 0);
-    ScheduleSound(obj, 0, obj.buffers[0].duration - (obj.buffers[0].duration / 10));
+    ScheduleSound(obj, 0, 0, 1);
+    ScheduleSound(obj, 1, obj.buffers[0].duration * 0.8, 2);
+    // ScheduleSound(obj, 0, obj.buffers[0].duration - (obj.buffers[0].duration / 10));
   }
 }
 // var currTime = context.currentTime;
@@ -232,31 +234,53 @@ function PlaySound(obj) {
 //   this.ctl2.gainNode.gain.value = gain2;
 // };
 
-function ScheduleSound(obj, index, delay = 0) {
-  let soundSource = obj.audioCtx.createBufferSource();
+function ScheduleSound(obj, index, delay = 0, gain = 1) {
+  let sound = new Object();
+  sound.parentObj = obj;
+  sound.bufferSource = obj.audioCtx.createBufferSource();
   // soundSource.buffer = obj.buffers[mock_GetRandomIntInclusive(0,obj.buffers.length-1)];
-  soundSource.buffer = obj.buffers[index];
-  if (obj.bufferSources.length % 2 == 0) {
-    soundSource.connect(obj.gainNode1);
+  sound.bufferSource.buffer = obj.buffers[index];
+  sound.buffersIndex = index;
+  sound.duration = sound.bufferSource.buffer.duration;
+  if (gain == 1) {
+    sound.gainNode = obj.gainNode1;
   }
   else {
-    soundSource.connect(obj.gainNode2);
+    sound.gainNode = obj.gainNode2;
   }
-  soundSource.onended = function() {
+  sound.bufferSource.connect(sound.gainNode);
+
+  sound.bufferSource.onended = function() {
     let thisIndex = obj.bufferSources.indexOf(this);
     let duration = this.buffer.duration;//obj.bufferSources[thisIndex].buffer.duration
+    //TODO: Need to use the duration of the other buffer.
     if (thisIndex != -1) {
       obj.bufferSources.splice(thisIndex, 1);
+      obj.sounds.splice(thisIndex, 1);
     }
     var nextIndex = (index >= (obj.buffers.length - 1) ? 0 : index + 1);
-    ScheduleSound(obj, nextIndex, duration - (duration / 10));
+    ScheduleSound(obj, nextIndex, obj.sounds[0].duration * 0.6, gain);
   }
-  let time = obj.audioCtx.currentTime + delay;
-  soundSource[soundSource.start ? 'start' : 'noteOn'](time);
+  let currTime = obj.audioCtx.currentTime;
+  sound.fadeInStart  = currTime + delay;
+  sound.fadeInEnd    = currTime + delay + (sound.duration / 9);
+  sound.fadeOutStart = currTime + delay + (sound.duration - (sound.duration / 10));
+  sound.fadeOutEnd   = currTime + delay + sound.duration;
 
-  console.log(obj.prefix + " Buf Length: " + (obj.bufferSources.length + 1) +" Scheduled a sound to play at: " + time);
+  sound.gainNode.gain.cancelScheduledValues(currTime);
+  sound.gainNode.gain.setValueAtTime(obj.volume, currTime);
+  sound.gainNode.gain.exponentialRampToValueAtTime(0.01, sound.fadeInStart);
+  sound.gainNode.gain.exponentialRampToValueAtTime(obj.volume, sound.fadeInEnd);
+  sound.gainNode.gain.exponentialRampToValueAtTime(obj.volume, sound.fadeOutStart);
+  sound.gainNode.gain.exponentialRampToValueAtTime(0.01, sound.fadeOutEnd);
 
-  obj.bufferSources.push(soundSource);
+  sound.bufferSource[sound.bufferSource.start ? 'start' : 'noteOn'](sound.fadeInStart);
+
+  console.log(obj.prefix + " Buf Length: " + (obj.bufferSources.length + 1) + " GainNode: " + gain + " Scheduled a sound to play at: " + (sound.fadeInStart));
+  console.log("In: " + sound.fadeInStart.toFixed(3) + ", " + sound.fadeInEnd.toFixed(3) + "\nOut: " + sound.fadeOutStart.toFixed(3) + ", " + sound.fadeOutEnd.toFixed(3));
+
+  obj.bufferSources.push(sound.bufferSource);
+  obj.sounds.push(sound);
 }
 
 mock_CreateBtn.onclick = function () {
@@ -373,11 +397,14 @@ function mock_LoadSounds(urlArray, obj, loadFunc, firstLoadFunc, progressFunc) {
 //   request.send();
 // }
 
-function mock_ChangeVolume(sliderElem, gainNodeElem) {
+function mock_ChangeVolume(sliderElem, gainNodeElem, obj = undefined) {
   // Convert value to a percentage (0, 100)
   let fraction = parseInt(sliderElem.value) / parseInt(sliderElem.max);
   // Let's use an x*x curve (x-squared) since simple linear (x) does not sound as good.
   gainNodeElem.gain.value = fraction * fraction;
+  if (obj) {
+    obj.volume = fraction * fraction;
+  }
 }
 
 function mock_MakeBuffer(obj) {
@@ -542,12 +569,12 @@ mock_MainHigh.querySelector(".slider").oninput = function() {
 
 mock_MainGain.querySelector(".slider").oninput = function() {
   mock_MainGain.querySelector(".val").innerHTML = this.value;
-  mock_ChangeVolume(this, mock_RainObj.gainNode1);
+  mock_ChangeVolume(this, mock_RainObj.gainNode1, mock_RainObj);
 }
 
 mock_MainGain2.querySelector(".slider").oninput = function() {
   mock_MainGain2.querySelector(".val").innerHTML = this.value;
-  mock_ChangeVolume(this, mock_RainObj.gainNode2);
+  mock_ChangeVolume(this, mock_RainObj.gainNode2, mock_RainObj);
 }
 
 const mock_ScriptRainBtn = document.querySelector("#mockScriptRAIN");
@@ -695,5 +722,5 @@ mock_AdvancedHigh.querySelector(".slider").oninput = function() {
 
 mock_AdvancedGain.querySelector(".slider").oninput = function() {
   mock_AdvancedGain.querySelector(".val").innerHTML = this.value;
-  mock_ChangeVolume(this, mock_ClipObj.gainNode1);
+  mock_ChangeVolume(this, mock_ClipObj.gainNode1, mock_ClipObj);
 }

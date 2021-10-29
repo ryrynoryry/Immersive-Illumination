@@ -1,0 +1,18 @@
+Need to be done:
+  Website:
+    1. Fade sounds into eachother
+    2. Find set of sounds
+    3. Sleep timer
+    Pretty interface
+    4. Write to file when lightning strikes
+
+  Lights:
+    1. Find twinkle animation
+    2. Make layer structure
+    3. Read files to determine when to play thunder
+    4. Make lightning animation
+Stretch goals:
+  Color changer
+  Custom animations
+  
+
