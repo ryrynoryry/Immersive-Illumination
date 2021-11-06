@@ -195,7 +195,7 @@ mock_ExpBtn.onclick = function() {
 function PlaySound(obj) {
   if (obj.sounds.length == 0) {
     ScheduleSound(obj, 0, 0, 1);
-    ScheduleSound(obj, 1, obj.buffers[0].duration * 0.8, 2);
+    ScheduleSound(obj, 1, obj.sounds[0].duration - 1.75, 2);
     // ScheduleSound(obj, 0, obj.buffers[0].duration - (obj.buffers[0].duration / 10));
   }
 }
@@ -248,6 +248,9 @@ function ScheduleSound(obj, index, delay = 0, gain = 1) {
   }
   sound.bufferSource.connect(sound.gainNode);
 
+  let currTime = obj.audioCtx.currentTime;
+  let fadeTime = 1;
+
   sound.bufferSource.onended = function() {
     let thisIndex = obj.sounds.indexOf(sound);
     //TODO: Need to use the duration of the other buffer.
@@ -258,12 +261,12 @@ function ScheduleSound(obj, index, delay = 0, gain = 1) {
     let duration = obj.sounds[thisIndex].duration
 
     var nextIndex = (index >= (obj.buffers.length - 1) ? 0 : index + 1);
-    ScheduleSound(obj, nextIndex, obj.sounds[0].duration * 0.6, gain);
+    ScheduleSound(obj, nextIndex, obj.sounds[0].duration - (2 * 1.75), gain);
   }
-  let currTime = obj.audioCtx.currentTime;
+
   sound.fadeInStart  = currTime + delay;
-  sound.fadeInEnd    = currTime + delay + (sound.duration / 9);
-  sound.fadeOutStart = currTime + delay + (sound.duration - (sound.duration / 10));
+  sound.fadeInEnd    = currTime + delay + fadeTime;
+  sound.fadeOutStart = currTime + delay + sound.duration - fadeTime;
   sound.fadeOutEnd   = currTime + delay + sound.duration;
 
   sound.gainNode.gain.cancelScheduledValues(currTime);
@@ -275,7 +278,7 @@ function ScheduleSound(obj, index, delay = 0, gain = 1) {
 
   sound.bufferSource[sound.bufferSource.start ? 'start' : 'noteOn'](sound.fadeInStart);
 
-  console.log(obj.prefix + " Buf Length: " + (obj.sounds.length + 1) + " GainNode: " + gain + " Scheduled a sound to play at: " + (sound.fadeInStart));
+  console.log(obj.prefix + " Buf Length: " + (obj.sounds.length + 1) + " GainNode: " + gain + " Vol: " + obj.volume + " Scheduled a sound to play at: " + (sound.fadeInStart));
   console.log("In: " + sound.fadeInStart.toFixed(3) + ", " + sound.fadeInEnd.toFixed(3) + "\nOut: " + sound.fadeOutStart.toFixed(3) + ", " + sound.fadeOutEnd.toFixed(3));
 
   obj.sounds.push(sound);
@@ -399,9 +402,23 @@ function mock_ChangeVolume(sliderElem, gainNodeElem, obj = undefined) {
   // Convert value to a percentage (0, 100)
   let fraction = parseInt(sliderElem.value) / parseInt(sliderElem.max);
   // Let's use an x*x curve (x-squared) since simple linear (x) does not sound as good.
-  gainNodeElem.gain.value = fraction * fraction;
-  if (obj) {
+  // gainNodeElem.gain.value = fraction * fraction;
+
+  if (obj && gainNodeElem) {
+    gainNodeElem.gain.cancelScheduledValues(obj.audioCtx.currentTime);
+    gainNodeElem.gain.exponentialRampToValueAtTime(fraction * fraction, obj.audioCtx.currentTime + 0.050);
+
     obj.volume = fraction * fraction;
+    if (obj === mock_RainObj) {
+      obj.sounds.forEach(element => {
+        if (element.gainNode === gainNodeElem) {
+          gainNodeElem.gain.exponentialRampToValueAtTime(0.01, element.fadeInStart);
+          gainNodeElem.gain.exponentialRampToValueAtTime(obj.volume, element.fadeInEnd);
+          gainNodeElem.gain.exponentialRampToValueAtTime(obj.volume, element.fadeOutStart);
+          gainNodeElem.gain.exponentialRampToValueAtTime(0.01, element.fadeOutEnd);
+        }
+      });
+    }
   }
 }
 
