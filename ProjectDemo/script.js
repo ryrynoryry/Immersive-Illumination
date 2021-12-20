@@ -592,6 +592,73 @@ mock_MainGain2.querySelector(".slider").oninput = function() {
   mock_ChangeVolume(this, mock_RainObj.gainNode2, mock_RainObj);
 }
 
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// Timer Section
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+
+let mock_Timer = document.querySelector("#mockTimer");
+mock_RemainingTimeLabel = mock_Timer.querySelector(".remainingTime");
+const mock_TimerStartBtn = mock_Timer.querySelector(".timerStart");
+let mock_TimerHours = mock_Timer.querySelector(".hourIn");
+let mock_TimerMins = mock_Timer.querySelector(".minuteIn");
+
+let timerRunning = false;
+let timeInSeconds = 0;
+let tickInterval = null;
+
+mock_TimerStartBtn.onclick = function () {
+  console.log("Timer clicked");
+  if (!timerRunning) {
+    // Start Timer
+    timerRunning = !timerRunning;
+    timeInSeconds = (mock_TimerHours.value * 60 * 60) + // Hours
+                    (mock_TimerMins.value * 60) + // Minutes
+                    0; // Seconds
+    DisplayTime(timeInSeconds);
+    mock_RemainingTimeLabel.hidden = false;
+    tickInterval = setInterval(TimerTick, 1000);
+    this.innerHTML = "Stop Timer";
+  }
+  else {
+    // Stop Timer
+    timerRunning = !timerRunning;
+    clearInterval(tickInterval);
+    DisplayTime(0);
+    mock_RemainingTimeLabel.hidden = true;
+    this.innerHTML = "Start Timer";
+  }
+
+}
+
+function TimerTick() {
+  DisplayTime(timeInSeconds)
+  timeInSeconds -= 1;
+  if (timeInSeconds < 0) {
+    clearInterval(tickInterval);
+    EndTimer();
+  }
+}
+
+function DisplayTime(seconds){
+  var displayHours = Math.floor(seconds / (60 * 60));
+  var remainder = seconds - (displayHours * 60 * 60);
+  var displayMinutes = Math.floor(remainder / 60);
+  var displaySeconds = remainder - (displayMinutes * 60);
+  // TODO: Make each field be two characters. (hh : mm : ss)
+  mock_RemainingTimeLabel.innerHTML = displayHours + " : " +
+                                      displayMinutes + " : " + displaySeconds;
+};
+
+function EndTimer() {
+  // TODO convert this to fade out
+  mock_RainObj.audioCtx.suspend();
+  mock_RainObj.isPlaying = false;
+  mock_ClipObj.audioCtx.suspend();
+  mock_ClipObj.isPlaying = false;
+}
+
 const mock_ScriptRainBtn = document.querySelector("#mockScriptRAIN");
 const mock_ScriptStopBtn = document.querySelector("#mockScriptSTOP");
 const mock_ScriptLabelBtn = document.querySelector("#mockScriptLabel");

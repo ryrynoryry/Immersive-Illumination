@@ -10,7 +10,7 @@
 
     <title>Ryno's Project Demo</title>
 
-    <link rel="stylesheet" href="">
+    <link rel="stylesheet" type="text/css" href="time.css">
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
   </head>
 
@@ -294,6 +294,23 @@
         <br>
         <input class=slider type="range" min="-0" max="100" value="100">
       </div>
+    </div>
+
+    <div id="mockTimer">
+      <label class="remainingTime" hidden>00:59:59</label>
+      <br>
+      <input class="hourIn" type="number" placeholder="H"
+             step="1" min="0" max="24">
+      <span>:</span>
+      <input class="minuteIn" type="number" placeholder="M"
+             step="0.1" min="0" max="59" list="suggestedMinutes">
+      <datalist id="suggestedMinutes">
+        <option value="15">
+        <option value="30">
+        <option value="45">
+      </datalist>
+      <br>
+      <button class="timerStart">Start Timer</button>
     </div>
 
     <div id=mockClipsSection style="background-color:rgb(166, 166, 252);">
