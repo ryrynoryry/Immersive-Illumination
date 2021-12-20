@@ -10,7 +10,8 @@
 
     <title>Ryno's Project Demo</title>
 
-    <link rel="stylesheet" type="text/css" href="time.css">
+    <link rel="stylesheet" type="text/css" href="timer.css">
+    <link rel="stylesheet" type="text/css" href="lights.css">
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
   </head>
 
@@ -27,6 +28,7 @@
       <button id="filterBtn" onClick="{ let x = document.getElementById('filterSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Filter</button>
       <button id="clipBtn" onClick="{ let x = document.getElementById('clipSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Clips</button>
       <button id="mockBtn" onClick="{ let x = document.getElementById('mockSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Mock</button>
+      <button id="lightsBtn" onClick="{ let x = document.getElementById('lightsSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Lights</button>
       <p></p>
   </div>
 
@@ -369,8 +371,19 @@
     </div>
 
   </div>
+  
+  <div id="lightsSection" hidden style="background-color:GhostWhite;">
+    <div class="color">
+      <label class="label" for="lightsColorSelector">Choose your color:</label>
+      <input type="color" class="selector" name="lightsColorSelector" value="#ff0000">
+      <div class="circle"></div>
+      <div class="square"></div>
+    </div>
+  </div>
+
 <script src="old.js"></script>
 <script src="script.js"></script>
+<script src="lights.js"></script>
 <script src="BufferLoader.js"></script>
 <!-- <script src="webaudio.js"></script> -->
 <script src="rate.js"></script>
