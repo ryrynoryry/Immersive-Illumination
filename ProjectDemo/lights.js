@@ -2,6 +2,8 @@
 
 const lightsSection = document.querySelector("#lightsSection");
 const colorDiv = lightsSection.querySelector(".color");
+const buttonsDiv = lightsSection.querySelector(".buttons");
+
 const selector = colorDiv.querySelector(".selector");
 let circle = colorDiv.querySelector(".circle");
 let square = colorDiv.querySelector(".square");
@@ -12,8 +14,7 @@ selector.oninput = function() {
 selector.onchange = function() {
   square.style.backgroundColor = selector.value;
   square.innerHTML = selector.value;
-  // TODO: Write to file
-  //LightsWriteValue(selector.value, "writeValue.php", "color.txt", "w+");
+  LightsWriteValue(selector.value, "writeValue.php", "color.txt", "w+");
 }
 
 function LightsWriteValue(text, phpFile, fileName, mode) {
