@@ -7,7 +7,6 @@ $f = fopen($fileName, $fileMode);
 fwrite($f, $data);
 fclose($f);
 
-
 // error_reporting(E_ALL);
 // $data = $_POST['data'];
 // $f = fopen('file.txt', 'w+');

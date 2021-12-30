@@ -3,10 +3,20 @@
   width: 50px;
   background-color: #000;
   border-radius: 50%;
+  float: left;
 }
 
 .square {
   height: 50px;
   width: 50px;
   background-color: #000;
+  float: left;
+}
+
+.container {
+    margin: auto;
+}
+
+.clear {
+    clear: both;
 }
