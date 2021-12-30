@@ -8,14 +8,12 @@ const textLabel = lightsSection.querySelector(".sequenceOutput");
 
 const selector = colorDiv.querySelector(".selector");
 let circle = colorDiv.querySelector(".circle");
-let square = colorDiv.querySelector(".square");
 selector.oninput = function() {
-  circle.style.backgroundColor = selector.value;
+  circle.style.borderColor = selector.value;
 }
 
 selector.onchange = function() {
-  square.style.backgroundColor = selector.value;
-  square.innerHTML = selector.value;
+  circle.style.backgroundColor = selector.value;
   LightsWriteValue(selector.value, "writeValue.php", "transfer/color.txt", "w+");
 }
 
