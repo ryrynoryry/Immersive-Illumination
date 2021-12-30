@@ -1,3 +1,5 @@
+# https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage
+
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 

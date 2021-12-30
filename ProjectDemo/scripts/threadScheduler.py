@@ -3,77 +3,15 @@ import os.path
 import time
 import config
 from LED_Sequences import *
-# from blueThreadLoop import MainBlue
-
-
-# class myThread (threading.Thread):
-#   def __init__(self, threadID, name, counter):
-#     threading.Thread.__init__(self)
-#     self.threadID = threadID
-#     self.name = name
-#     self.counter = counter
-#   def run(self):
-#     print("Starting " + self.name)
-#     print_time(self.name, 5, self.counter)
-#     print("Exiting " + self.name)
-
-# threadPool = []
-# threadPoolRun = True
-
-# run = True
-# LEDSequence = ''
-# runBlue = [True]
-
-# fileName = ""
-
-# def LookForFile(strToFind, path):
-#     """
-#     function repeatedly look for a file
-#     """
-#     global fileName
-#     global run
-#     count = 0
-#     filePath = path + strToFind
-#     while run:
-#       count += 1
-#       if os.path.exists(filePath):
-#         fileName = strToFind
-#         print("{0} FOUND {1} at {2} [{3}]".format(t1.getName(), strToFind, filePath, count))
-#         MainBlue(runBlue)
-#         run = False
-#       else:
-#         print("{0} not found {1} at {2} [{3}]".format(t1.getName(), strToFind, filePath, count))
-#       time.sleep(1)
-#     print("exiting file thread!")
-
-# def LookForStop(strToFind, path):
-#     """
-#     function repeatedly look for a file
-#     """
-#     global run
-#     count = 0
-#     filePath = path + strToFind
-#     while run:
-#       count += 1
-#       if os.path.exists(filePath):
-#         runBlue[0] = False
-#         run = False
-#         print("{0} FOUND {1} at {2} [{3}]".format(t2.getName(), strToFind, filePath, count))
-#       else:
-#         print("{0} not found {1} at {2} [{3}]".format(t2.getName(), strToFind, filePath, count))
-#       time.sleep(10)
-#     print("exiting stop thread!")
+from LED_Controller import RenderLoop
 
 def PollLEDSequence(path):
     """
     function to repeatedly read the LED_Sequence file to see which mode is selected and start the particular thread
     """
-    global threadPool
-    global threadPoolRun
-    global run
-    global LEDSequence
     count = 0
     filePath = path + "LED_Sequence"
+    func = None
     while config.run:
       count += 1
       lines = []
@@ -87,19 +25,30 @@ def PollLEDSequence(path):
         """
         Only a sequence name is listed. Run that sequence.
         """
-        if lines[0] != config.LEDSequence:
-          config.threadPoolRun = False
-          for thread in config.threadPool:
-            print(f'Poll closing thread: <{thread.name}>')
-            thread.join()
-          config.threadPool.clear()
-          config.threadPoolRun = True
-          config.LEDSequence = lines[0]
-          print(f'New sequence selected: <{config.LEDSequence}>')
-          config.threadPool.append(threading.Thread(target=globals()[config.LEDSequence], name=f'THREAD_{config.LEDSequence}', args=(''), daemon=True))
-          config.threadPool[-1].start()
-        # else:
-        #   print(f'Continuing sequence: <{LEDSequence}>')
+        layerSelection = 0
+        line1 = lines[0].split(',')
+        if line1[0] != config.LEDSequence:
+          try:
+            func = globals()[line1[0]]
+          except KeyError:
+            # Function does not exist for that sequence name
+            pass
+          else:
+            if len(line1) > 1:
+              layerSelection = int(line1[1])
+            config.threadPoolRun = False
+            for thread in config.threadPool:
+              print(f'Poll closing thread: <{thread.name}>')
+              thread.join()
+            config.threadPool.clear()
+            config.threadPoolRun = True
+            config.LEDSequence = line1[0]
+            print(f'New sequence selected: <{config.LEDSequence}>')
+            config.threadPool.append(threading.Thread(
+                target=func, name=f'THREAD_{config.LEDSequence}', args=(layerSelection,), daemon=True))
+            config.threadPool[-1].start()
+          # else:
+          #   print(f'Continuing sequence: <{LEDSequence}>')
       else:
         lineCount = 0
         for line in lines:
@@ -107,22 +56,28 @@ def PollLEDSequence(path):
           print(f'line {lineCount}: {line}')
 
       time.sleep(1)
-    print("exiting PollLEDSequence thread!")
+    print("exiting PollLEDSequence thread")
 
 if __name__ == "__main__":
-    # creating thread
-    t1 = threading.Thread(target=PollLEDSequence, name='THREAD_Poll', args=('../transfer/',), daemon=True)
-    # t2 = threading.Thread(target=LookForFile, name="THREAD_Finder", args=("rain","../"), daemon=True)
-    # t3 = threading.Thread(name="THREAD_Stopper", target=LookForStop, args=("stop","../"), daemon=True)
+    # creating threads
+    primaryThreads = []
 
-    # starting threads
-    t1.start()
-    # t2.start()
-    # t3.start()
+    # Thread to poll Sequence file to begin other threads
+    primaryThreads.append(threading.Thread(
+        target=PollLEDSequence, name='THREAD_Poll', args=('../transfer/',), daemon=True))
+    # Thread to render the virtual pixel values to the physical strip
+    primaryThreads.append(threading.Thread(
+        target=RenderLoop, name='THREAD_Render', args=(), daemon=True))
 
+    # starting primary threads
+    for t in primaryThreads:
+      t.start()
+
+    # Continue along main thread
     curpath = os.path.abspath(os.curdir)
     print("Current path is: %s" % (curpath))
 
+    # Continuously poll keyboard input
     while config.run:
       i = input("Enter text ('exit' to quit): ")
       print(f'Input received: <{i}>')
@@ -130,23 +85,12 @@ if __name__ == "__main__":
         break
       with open("../transfer/LED_Sequence", "w") as f:
         f.write(i)
-      if i == 'exit':
-        break
-    print("While loop has exited")
-
-    # input("Press Enter to flip foo")
-    # if runBlue[0]:
-    #   runBlue[0] = False
-    # else:
-    #   runBlue[0] = True
-    # runBlue[0] = False
-    # input("Press Enter to exit")
+    print("Keyboard loop has exited")
 
     config.run = False
-    # wait until threads are completely executed
-    t1.join()
-    # t2.join()
-    # t3.join()
+    # wait until primary threads are completely executed
+    for t in primaryThreads:
+      t.join()
 
     config.threadPoolRun = False
     for thread in config.threadPool:
@@ -157,5 +101,5 @@ if __name__ == "__main__":
     with open("../transfer/LED_Sequence", "w") as f:
       f.write('')
   
-    # both threads completely executed
-    print("Done!")
+    # All threads completely executed
+    print("Goodbye!")
