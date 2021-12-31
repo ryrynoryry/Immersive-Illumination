@@ -6,7 +6,7 @@ import threading
 """
 LED Controller related globals
 """
-NUM_PIXELS = 10  # The number of NeoPixels
+NUM_PIXELS = 300  # The number of NeoPixels
 LEDstrip = []
 stripInitialized = False
 

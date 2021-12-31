@@ -48,7 +48,7 @@ def Red(X=0):
     config.prevFrameRendered.wait()
 
     config.stripLayersLocks[X].acquire()
-    config.stripLayers[X] = [(0, 255, 0)] * config.NUM_PIXELS
+    config.stripLayers[X] = [(255, 0, 0)] * config.NUM_PIXELS
     config.stripLayersLocks[X].release()
 
     # Wait until the current frame has started rendering
@@ -67,10 +67,35 @@ def Green(X=0):
 
     config.stripLayersLocks[X].acquire()
     for i in range(0,3):
-      if config.stripLayers[X][i][0] == 255:
+      if config.stripLayers[X][i][1] == 255:
         config.stripLayers[X][i] = (0, 0, 0)
       else:
-        config.stripLayers[X][i] = (config.stripLayers[X][i][0] + 1, 0, 0)
+        config.stripLayers[X][i] = (0, config.stripLayers[X][i][1] + 1, 0)
+    config.stripLayersLocks[X].release()
+
+    # Wait until the current frame has started rendering
+    config.curFrameRendering.wait()
+  else:
+    config.prevFrameRendered.wait()
+    config.stripLayersLocks[X].acquire()
+    config.stripLayers[X] = [None] * config.NUM_PIXELS
+    config.stripLayersLocks[X].release()
+
+def Chase(X=0):
+  index = 0
+  while config.threadPoolRun:
+    # Wait until the previous frame is done rendering
+    config.prevFrameRendered.wait()
+
+    config.stripLayersLocks[X].acquire()
+    if index < config.NUM_PIXELS:
+      config.stripLayers[X][index] = (50, 50, 50)
+      if index > 0:
+        config.stripLayers[X][index - 1] = (0, 0, 0)
+      index += 1
+    else:
+      config.stripLayers[X][config.NUM_PIXELS - 1] = (0, 0, 0)
+      index = 0
     config.stripLayersLocks[X].release()
 
     # Wait until the current frame has started rendering

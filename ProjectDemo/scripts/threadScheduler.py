@@ -79,23 +79,24 @@ if __name__ == "__main__":
 
     # Continuously poll keyboard input
     while config.run:
-      i = input("Enter text ('exit' to quit): ")
-      print(f'Input received: <{i}>')
-      if not i:
-        break
-      with open("../transfer/LED_Sequence", "w") as f:
-        f.write(i)
+      # i = input("Enter text ('exit' to quit): ")
+      # print(f'Input received: <{i}>')
+      # if not i:
+      #   break
+      # with open("../transfer/LED_Sequence", "w") as f:
+      #   f.write(i)
+      pass
     print("Keyboard loop has exited")
-
-    config.run = False
-    # wait until primary threads are completely executed
-    for t in primaryThreads:
-      t.join()
 
     config.threadPoolRun = False
     for thread in config.threadPool:
       print(f'Closing thread: {thread.name}')
       thread.join()
+
+    config.run = False
+    # wait until primary threads are completely executed
+    for t in primaryThreads:
+      t.join()
 
     # Clear the current sequence
     with open("../transfer/LED_Sequence", "w") as f:
