@@ -63,11 +63,7 @@ def PollLEDSequence(path):
             config.layerManager[localLayer]["sequence"] = localSequence
 
             # Stop existing threads on the given layer
-            if config.layerManager[localLayer]["thread"] is not None:
-              print(f'Poll closing thread: <{config.layerManager[localLayer]["thread"].name}>')
-              config.layerManager[localLayer]["run"] = False
-              config.layerManager[localLayer]["thread"].join()
-              config.layerManager[localLayer]["thread"] = None
+            CloseThread(localLayer)
             
             # Start new sequence on the given layer
             config.layerManager[localLayer]["sequence"] = localSequence
@@ -83,6 +79,17 @@ def PollLEDSequence(path):
 
       time.sleep(1)
     print("exiting PollLEDSequence thread")
+
+def CloseThread(layer):
+  if config.layerManager[layer]["thread"] is not None:
+      print(f'Poll closing thread: <{config.layerManager[layer]["thread"].name}>')
+      config.layerManager[layer]["run"] = False
+      config.layerManager[layer]["thread"].join()
+      # Clear the pixels on the ending thread.
+      config.stripLayersLocks[layer].acquire()
+      config.stripLayers[layer] = [None] * config.NUM_PIXELS
+      config.stripLayersLocks[layer].release()
+      config.layerManager[layer]["thread"] = None
 
 if __name__ == "__main__":
     # creating threads

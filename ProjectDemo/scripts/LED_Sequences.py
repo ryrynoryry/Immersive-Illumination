@@ -17,12 +17,6 @@ def Stop(input):
 
     # Wait until the current frame has started rendering
     config.curFrameRendering.wait()
-  else:
-    config.prevFrameRendered.wait()
-    config.stripLayersLocks[X].acquire()
-    config.stripLayers[X] = [None] * config.NUM_PIXELS
-    config.stripLayersLocks[X].release()
-
 
 def Rain(input):
   X = int(input["layer"])
@@ -37,11 +31,6 @@ def Rain(input):
 
     # Wait until the current frame has started rendering
     config.curFrameRendering.wait()
-  else:
-    config.prevFrameRendered.wait()
-    config.stripLayersLocks[X].acquire()
-    config.stripLayers[X] = [None] * config.NUM_PIXELS
-    config.stripLayersLocks[X].release()
 
 def Red(input):
   X = int(input["layer"])
@@ -55,11 +44,6 @@ def Red(input):
 
     # Wait until the current frame has started rendering
     config.curFrameRendering.wait()
-  else:
-    config.prevFrameRendered.wait()
-    config.stripLayersLocks[X].acquire()
-    config.stripLayers[X] = [None] * config.NUM_PIXELS
-    config.stripLayersLocks[X].release()
 
 def Green(input):
   X = int(input["layer"])
@@ -80,11 +64,6 @@ def Green(input):
 
     # Wait until the current frame has started rendering
     config.curFrameRendering.wait()
-  else:
-    config.prevFrameRendered.wait()
-    config.stripLayersLocks[X].acquire()
-    config.stripLayers[X] = [None] * config.NUM_PIXELS
-    config.stripLayersLocks[X].release()
 
 def Chase(input):
   X = int(input["layer"])
@@ -106,11 +85,6 @@ def Chase(input):
 
     # Wait until the current frame has started rendering
     config.curFrameRendering.wait()
-  else:
-    config.prevFrameRendered.wait()
-    config.stripLayersLocks[X].acquire()
-    config.stripLayers[X] = [None] * config.NUM_PIXELS
-    config.stripLayersLocks[X].release()
 
 def Color(input):
   X = int(input["layer"])
@@ -120,7 +94,6 @@ def Color(input):
 
 def clear(input):
   X = int(input["layer"])
-  config.prevFrameRendered.wait()
   config.stripLayersLocks[X].acquire()
   config.stripLayers[X] = [None] * config.NUM_PIXELS
   config.stripLayersLocks[X].release()
