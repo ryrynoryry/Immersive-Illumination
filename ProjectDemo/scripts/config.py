@@ -34,11 +34,11 @@ for i in range(NUM_LAYERS):
 """
 Threading globals
 """
-threadPool = []
-threadPoolRun = True
+layerManager = []
+for i in range(NUM_LAYERS):
+    layerManager.append({"sequence": "", "thread": None, "run": True})
 run = True
 
 """
 Misc
 """
-LEDSequence = ''

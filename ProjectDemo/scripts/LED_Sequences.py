@@ -5,8 +5,9 @@ import random
 File containing each of the functions that run the LED Sequence loops.
 """
 
-def Stop(X=0):
-  while config.threadPoolRun:
+def Stop(input):
+  X = int(input["layer"])
+  while config.layerManager[X]["run"]:
     # Wait until the previous frame is done rendering
     config.prevFrameRendered.wait()
 
@@ -23,8 +24,9 @@ def Stop(X=0):
     config.stripLayersLocks[X].release()
 
 
-def Rain(X=0):
-  while config.threadPoolRun:
+def Rain(input):
+  X = int(input["layer"])
+  while config.layerManager[X]["run"]:
     # Wait until the previous frame is done rendering
     config.prevFrameRendered.wait()
 
@@ -41,9 +43,9 @@ def Rain(X=0):
     config.stripLayers[X] = [None] * config.NUM_PIXELS
     config.stripLayersLocks[X].release()
 
-
-def Red(X=0):
-  while config.threadPoolRun:
+def Red(input):
+  X = int(input["layer"])
+  while config.layerManager[X]["run"]:
     # Wait until the previous frame is done rendering
     config.prevFrameRendered.wait()
 
@@ -59,14 +61,17 @@ def Red(X=0):
     config.stripLayers[X] = [None] * config.NUM_PIXELS
     config.stripLayersLocks[X].release()
 
-def Green(X=0):
-  config.stripLayers[X] = [(0, 0, 0)] * config.NUM_PIXELS
-  while config.threadPoolRun:
+def Green(input):
+  X = int(input["layer"])
+  numPixelsToSet = 3
+  for i in range(numPixelsToSet):
+    config.stripLayers[X][i] = (0, 0, 0)
+  while config.layerManager[X]["run"]:
     # Wait until the previous frame is done rendering
     config.prevFrameRendered.wait()
 
     config.stripLayersLocks[X].acquire()
-    for i in range(0,3):
+    for i in range(numPixelsToSet):
       if config.stripLayers[X][i][1] == 255:
         config.stripLayers[X][i] = (0, 0, 0)
       else:
@@ -81,9 +86,10 @@ def Green(X=0):
     config.stripLayers[X] = [None] * config.NUM_PIXELS
     config.stripLayersLocks[X].release()
 
-def Chase(X=0):
+def Chase(input):
+  X = int(input["layer"])
   index = 0
-  while config.threadPoolRun:
+  while config.layerManager[X]["run"]:
     # Wait until the previous frame is done rendering
     config.prevFrameRendered.wait()
 
@@ -106,13 +112,19 @@ def Chase(X=0):
     config.stripLayers[X] = [None] * config.NUM_PIXELS
     config.stripLayersLocks[X].release()
 
-def Color(X=0):
-  while config.threadPoolRun:
+def Color(input):
+  X = int(input["layer"])
+  while config.layerManager[X]["run"]:
     print("Color")
     time.sleep(1)
 
-def exit(X=0):
-  while config.threadPoolRun:
+def clear(input):
+  X = int(input["layer"])
+  config.prevFrameRendered.wait()
+  config.stripLayersLocks[X].acquire()
+  config.stripLayers[X] = [None] * config.NUM_PIXELS
+  config.stripLayersLocks[X].release()
+
+def exit():
     print("Exit function called")
-    config.threadPoolRun = False
     config.run = False

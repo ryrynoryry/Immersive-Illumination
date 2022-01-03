@@ -2,8 +2,9 @@ import threading
 import os.path
 import time
 import config
-from LED_Sequences import *
+from LED_Sequences import * # Import all sequences
 from LED_Controller import RenderLoop
+import json
 
 def PollLEDSequence(path):
     """
@@ -11,49 +12,74 @@ def PollLEDSequence(path):
     """
     count = 0
     filePath = path + "LED_Sequence"
-    func = None
+    jsonDict = None
+    jsonCorrect = False
+    localLayer = None
+    localSequence = None
+    localfunc = None
     while config.run:
       count += 1
-      lines = []
       with open(filePath, 'r') as f:
-        lines = f.readlines()
+        jsonStringInput = f.read()
 
-      """
-      Do whatever with the file contents
-      """
-      if len(lines) == 1:
-        """
-        Only a sequence name is listed. Run that sequence.
-        """
-        layerSelection = 0
-        line1 = lines[0].split(',')
-        if line1[0] != config.LEDSequence:
-          try:
-            func = globals()[line1[0]]
-          except KeyError:
-            # Function does not exist for that sequence name
-            pass
-          else:
-            if len(line1) > 1:
-              layerSelection = int(line1[1])
-            config.threadPoolRun = False
-            for thread in config.threadPool:
-              print(f'Poll closing thread: <{thread.name}>')
-              thread.join()
-            config.threadPool.clear()
-            config.threadPoolRun = True
-            config.LEDSequence = line1[0]
-            print(f'New sequence selected: <{config.LEDSequence}>')
-            config.threadPool.append(threading.Thread(
-                target=func, name=f'THREAD_{config.LEDSequence}', args=(layerSelection,), daemon=True))
-            config.threadPool[-1].start()
-          # else:
-          #   print(f'Continuing sequence: <{LEDSequence}>')
+      # Parse json input
+      try:
+        jsonDict = json.loads(jsonStringInput)
+      except ValueError as e:
+        # Check for exit condition
+        if jsonStringInput == "exit":
+          exit() # Call to: LED_Sequences.exit()
+        jsonCorrect = False
       else:
-        lineCount = 0
-        for line in lines:
-          lineCount += 1
-          print(f'line {lineCount}: {line}')
+        if "sequence" in jsonDict and "layer" in jsonDict:
+          jsonCorrect = True
+
+      if jsonCorrect:
+        """
+        Input parsed properly. Perform actions.
+        """
+        try:
+          localLayer = int(jsonDict["layer"])
+          localfunc = globals()[jsonDict["sequence"]]
+        except ValueError:
+          # Layer element cannot be parsed to an int
+          localLayer = None
+          localfunc = None
+          pass
+        except KeyError:
+          # Function does not exist for that sequence name
+          localLayer = None
+          localfunc = None
+          pass
+        else:
+          # Bound the layer to the max and min values
+          localLayer = max(localLayer, 0)  # Set Min
+          localLayer = min(localLayer, config.NUM_LAYERS - 1)  # Set Max
+          localSequence = jsonDict["sequence"]
+
+          # Perform actions if the layer needs changing
+          if localSequence != config.layerManager[localLayer]["sequence"]:
+            # Set the sequence name
+            config.layerManager[localLayer]["sequence"] = localSequence
+
+            # Stop existing threads on the given layer
+            if config.layerManager[localLayer]["thread"] is not None:
+              print(f'Poll closing thread: <{config.layerManager[localLayer]["thread"].name}>')
+              config.layerManager[localLayer]["run"] = False
+              config.layerManager[localLayer]["thread"].join()
+              config.layerManager[localLayer]["thread"] = None
+            
+            # Start new sequence on the given layer
+            config.layerManager[localLayer]["sequence"] = localSequence
+            print(f'New sequence selected: <{config.layerManager[localLayer]["sequence"]}>')
+            config.layerManager[localLayer]["run"] = True
+            config.layerManager[localLayer]["thread"] = threading.Thread(
+                target=localfunc, name=f'THREAD_{localSequence}', args=(jsonDict,), daemon=True)
+            config.layerManager[localLayer]["thread"].start()
+        # else:
+        #   print(f'Continuing sequence: <{LEDSequence}>')
+      else:
+        print(f"Invalid JSON: {jsonStringInput}")
 
       time.sleep(1)
     print("exiting PollLEDSequence thread")
@@ -88,10 +114,13 @@ if __name__ == "__main__":
       pass
     print("Keyboard loop has exited")
 
-    config.threadPoolRun = False
-    for thread in config.threadPool:
-      print(f'Closing thread: {thread.name}')
-      thread.join()
+    for layer in config.layerManager:
+      if layer["thread"] is not None:
+        print(f'Closing layer {config.layerManager.index(layer)} thread: {layer["thread"].name}')
+        layer["run"] = False
+        layer["thread"].join()
+        layer["thread"] = None
+        layer["sequence"] = ''
 
     config.run = False
     # wait until primary threads are completely executed

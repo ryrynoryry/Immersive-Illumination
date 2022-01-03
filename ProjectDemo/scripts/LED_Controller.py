@@ -22,6 +22,7 @@ def InitializePixels(pixelBrightness = 1.0):
   config.LEDstrip = neopixel.NeoPixel(
       HARDWARE_PIN, config.NUM_PIXELS, brightness=pixelBrightness, auto_write=False, pixel_order=ORDER
   )
+  # config.LEDstrip = [(0,0,0)] * config.NUM_PIXELS
 
   for i in range(config.NUM_PIXELS):
     config.LEDstrip[i] = (25, 25, 25)
@@ -65,7 +66,6 @@ def InitializePixels(pixelBrightness = 1.0):
   config.LEDstrip.fill((0, 0, 0))
   config.LEDstrip.show()
 
-  # config.LEDstrip = [(0,0,0)] * config.NUM_PIXELS
 
   config.stripInitialized = True
 
@@ -78,18 +78,21 @@ def RenderPixels(localStripLayers):
     else:
       print(f'Layer {i} busy')
 
-  # Iterate over the strip layers to print
+  # Copy pixel layers from top to bottom to the strip
   for i in range(config.NUM_PIXELS):
     for layer in reversed(localStripLayers):
       if layer[i] is not None:
         config.LEDstrip[i] = layer[i]
         break
+    else:
+      # If no break was reached, all values were None so set the pixel to zeros
+      config.LEDstrip[i] = (0, 0, 0)
 
   config.LEDstrip.show()
   # print(config.LEDstrip)
 
 def RenderLoop():
-  FRAME_RATE = 1 / 30 # 30Hz
+  FRAME_RATE = 1 / 60 # 60Hz (Reality is slower than this. ~15ms per frame)
   localLayers = [None] * config.NUM_LAYERS
 
   InitializePixels(1.0)
@@ -120,21 +123,21 @@ def RenderLoop():
     # print(f'Time to sleep: {timeUntilNextFrame}')
     # Only sleep if we are not behind schedule. Alternative: time.sleep(max(timeUntilNextFrame, 0.0))
     if timeUntilNextFrame > 0.0:
-      # time.sleep(timeUntilNextFrame)
+      time.sleep(timeUntilNextFrame)
       pass
+
     # secondDuration = time.time() - secondStart
     # if secondDuration >= 1.0:
     #   print(f"Frames rendered in {secondDuration} seconds: {secondFrames}")
-    #   secondStart = time.time()
     #   secondFrames = 0
+    #   secondStart = time.time()
   else:
 
     localLayers = [[(0, 0, 0)] * config.NUM_PIXELS for i in range(config.NUM_LAYERS)]
     RenderPixels(localLayers)
 
     if config.stripInitialized:
-      config.LEDstrip.deinit()
-    pass
+      pass
 
     config.prevFrameRendered.set()
     config.curFrameRendering.set()
