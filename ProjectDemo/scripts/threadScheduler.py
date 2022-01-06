@@ -35,9 +35,7 @@ def PollLEDSequence(path):
           jsonCorrect = True
 
       if jsonCorrect:
-        """
-        Input parsed properly. Perform actions.
-        """
+        # Input is in JSON format and contains the required fields.
         try:
           localLayer = int(jsonDict["layer"])
           localfunc = globals()[jsonDict["sequence"]]
@@ -47,7 +45,7 @@ def PollLEDSequence(path):
           localfunc = None
           pass
         except KeyError:
-          # Function does not exist for that sequence name
+          # Function does not exist for the given sequence name
           localLayer = None
           localfunc = None
           pass
@@ -59,21 +57,19 @@ def PollLEDSequence(path):
 
           # Perform actions if the layer needs changing
           if localSequence != config.layerManager[localLayer]["sequence"]:
-            # Set the sequence name
-            config.layerManager[localLayer]["sequence"] = localSequence
 
             # Stop existing threads on the given layer
             CloseThread(localLayer)
             
             # Start new sequence on the given layer
             config.layerManager[localLayer]["sequence"] = localSequence
-            print(f'New sequence selected: <{config.layerManager[localLayer]["sequence"]}>')
+            print(f'New sequence selected: <{localSequence}>')
             config.layerManager[localLayer]["run"] = True
             config.layerManager[localLayer]["thread"] = threading.Thread(
                 target=localfunc, name=f'THREAD_{localSequence}', args=(jsonDict,), daemon=True)
             config.layerManager[localLayer]["thread"].start()
-        # else:
-        #   print(f'Continuing sequence: <{LEDSequence}>')
+          # else:
+          #   print(f'Continuing sequence: <{LEDSequence}>')
       else:
         print(f"Invalid JSON: {jsonStringInput}")
 

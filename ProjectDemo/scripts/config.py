@@ -7,6 +7,7 @@ import threading
 LED Controller related globals
 """
 NUM_PIXELS = 300  # The number of NeoPixels
+PIXEL_RANGE = range(NUM_PIXELS)
 LEDstrip = []
 stripInitialized = False
 
@@ -17,6 +18,7 @@ curFrameRendering = threading.Event()
 LED Strip representation
 """
 NUM_LAYERS = 5
+LAYER_RANGE = range(NUM_LAYERS)
 # Create 2D array of parallel virtual strips
 stripLayers = [[None] * NUM_PIXELS for i in range(NUM_LAYERS)]
 stripLayersLocks = []
@@ -42,3 +44,10 @@ run = True
 """
 Misc
 """
+
+def Bound(n, maxIN, minIN = 0):
+    if maxIN < minIN:
+      maxn = minIN
+      minn = maxIN
+    return max(min(maxn, n), minn)
+
