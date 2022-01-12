@@ -114,6 +114,7 @@ if __name__ == "__main__":
       #   break
       # with open("../transfer/LED_Sequence", "w") as f:
       #   f.write(i)
+      time.sleep(0.01)
       pass
     print("Keyboard loop has exited")
 

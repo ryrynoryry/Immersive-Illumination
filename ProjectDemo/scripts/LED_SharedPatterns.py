@@ -50,9 +50,25 @@ def GenerateLinearGradient(startColor, endColor=(255,255,255), n=10):
   for t in range(1, n):
     # Interpolate RGB vector for color at the current value of t
     curr_vector = [
-        int(startColor[j] + (endColor[j]-startColor[j]) * (float(t)/(n-1)))
+        int(Lerp(startColor[j], endColor[j], t/(n-1)) + 0.5) # Integer rounding
         for j in range(3)]
     # Add it to our list of output colors
     RGB_list.append(curr_vector)
 
   return RGB_list
+
+
+def Lerp(start, end, t=0.5):
+  return (1-t) * start + t * end
+
+
+def tuple2hex(color):
+  return rgb2hex(color[0], color[1], color[2])
+
+def rgb2hex(r, g, b):
+    return "#{:02x}{:02x}{:02x}".format(max(0, min(r, 255)), max(0, min(g, 255)), max(0, min(b, 255)))
+
+def hex2rgb(hexcode):
+    return tuple(map(ord, hexcode[1:].decode('hex')))
+
+

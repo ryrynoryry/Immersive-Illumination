@@ -67,6 +67,7 @@ def Green(input):
 
 def Chase(input):
   X = int(input["layer"])
+  BRIGHTNESS = 255 # 50
   index = 0
   while config.layerManager[X]["run"]:
     # Wait until the previous frame is done rendering
@@ -74,12 +75,12 @@ def Chase(input):
 
     config.stripLayersLocks[X].acquire()
     if index < config.NUM_PIXELS:
-      config.stripLayers[X][index] = (50, 50, 50)
+      config.stripLayers[X][index] = (BRIGHTNESS, BRIGHTNESS, BRIGHTNESS)
       if index > 0:
-        config.stripLayers[X][index - 1] = (0, 0, 0)
+        config.stripLayers[X][index - 1] = None
       index += 1
     else:
-      config.stripLayers[X][config.NUM_PIXELS - 1] = (0, 0, 0)
+      config.stripLayers[X][config.NUM_PIXELS - 1] = None
       index = 0
     config.stripLayersLocks[X].release()
 

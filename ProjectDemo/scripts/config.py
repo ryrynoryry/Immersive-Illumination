@@ -23,7 +23,9 @@ LAYER_RANGE = range(NUM_LAYERS)
 stripLayers = [[None] * NUM_PIXELS for i in range(NUM_LAYERS)]
 stripLayersLocks = []
 for i in range(NUM_LAYERS):
-    stripLayersLocks.append(threading.Lock())
+  stripLayersLocks.append(threading.Lock())
+
+layerAnimationSpeed = [1.0] * NUM_LAYERS
 
 # Class example below:
 # class Car:
@@ -38,7 +40,7 @@ Threading globals
 """
 layerManager = []
 for i in range(NUM_LAYERS):
-    layerManager.append({"sequence": "", "thread": None, "run": True})
+  layerManager.append({"sequence": "", "thread": None, "run": True})
 run = True
 
 """
@@ -46,8 +48,8 @@ Misc
 """
 
 def Bound(n, maxIN, minIN = 0):
-    if maxIN < minIN:
-      maxn = minIN
-      minn = maxIN
-    return max(min(maxn, n), minn)
+  if maxIN < minIN:
+    maxn = minIN
+    minn = maxIN
+  return max(min(maxn, n), minn)
 
