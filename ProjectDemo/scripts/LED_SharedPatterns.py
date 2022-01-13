@@ -59,7 +59,8 @@ def GenerateLinearGradient(startColor, endColor=(255,255,255), n=10):
 
 
 def Lerp(start, end, t=0.5):
-  return (1-t) * start + t * end
+  # (1-t) * start + t * end
+  return [(1-t) * start[i] + t * end[i] for i in range(min(len(start), len(end)))]
 
 
 def tuple2hex(color):

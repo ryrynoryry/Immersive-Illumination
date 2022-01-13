@@ -82,7 +82,8 @@ def InitializePixels(pixelBrightness = 1.0):
   root.configure(background='black') # Black background
   root.title("Virtual Strip") # Title
   root.attributes('-topmost', True) # Always on top
-  root.overrideredirect(True) # Remove toolbar and clear from taskbar
+  # root.overrideredirect(True) # Remove toolbar and clear from taskbar
+  root.geometry("+0+100")
 
   canvas = tkinter.Canvas(root, bg="black", height=2*32, width=2500)
   sqList = [None] * config.NUM_PIXELS
