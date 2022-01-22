@@ -23,14 +23,80 @@ def Stop(input):
 
 def Rain(input):
   X = int(input["layer"])
+  BRIGHTNESS = 1 #0.07
   while config.layerManager[X]["run"]:
     # Wait until the previous frame is done rendering
     config.prevFrameRendered.wait()
 
     config.stripLayersLocks[X].acquire()
     for i in range(config.NUM_PIXELS):
-      config.stripLayers[X][i] = (0, 0, random.randint(5, 20))
+      if not config.stripLayers[X][i] or config.stripLayers[X][i][2] == 0:
+        config.stripLayers[X][i] = (0, 0, int(random.randint(int(255/4), 255) * BRIGHTNESS))
+      elif random.randint(1, 4) == 1:
+        config.stripLayers[X][i] = (0, 0, max(0,int(config.stripLayers[X][i][2] - (14 * BRIGHTNESS) + 0.5)))
     config.stripLayersLocks[X].release()
+
+    # Wait until the current frame has started rendering
+    config.curFrameRendering.wait()
+
+def Lightning(input):
+  X = int(input["layer"])
+  illuminationArea = input["area"]
+  BRIGHTNESS = 1.0
+  lightningOver = False
+  originalLightningColor = (255,255,255)
+  lightningColor = [int((c * BRIGHTNESS) + 0.5) for c in originalLightningColor]
+  SUB_BRIGHTNESS_PERCENT = 0.5 # Percentage of main strike brightness for sub strikes
+  subLightningColor = [int((c * SUB_BRIGHTNESS_PERCENT) + 0.5) for c in lightningColor]
+  MAX_SUBSTRIKES = 4
+  subStrikes = random.randint(0, MAX_SUBSTRIKES)
+  buildingStrikes = random.randint(0, 4)
+  fadeSpeed = 50 * BRIGHTNESS # color values
+  iteration = 0
+
+  currentColor = [0,0,0]
+
+  def Strike(color):
+    nonlocal currentColor
+    config.stripLayersLocks[X].acquire()
+    for i in range(illuminationArea[0], illuminationArea[1]):
+      currentColor = color
+      config.stripLayers[X][i] = currentColor
+    config.stripLayersLocks[X].release()
+
+  def Fade():
+    Strike([max(0, int((c - fadeSpeed) + 0.5)) for c in currentColor])
+
+  while config.layerManager[X]["run"] and not lightningOver:
+    # Wait until the previous frame is done rendering
+    config.prevFrameRendered.wait()
+
+    if buildingStrikes > 0:
+      if iteration % 4 == 0:
+        Strike(subLightningColor)
+        buildingStrikes -= 1
+      else:
+        Fade()
+    elif buildingStrikes in range(0,-3,-1): # Number of frames before fading
+      Strike(lightningColor) # BIG STRIKE
+      buildingStrikes -= 1
+    else:
+      Fade()
+      if random.randint(0,4) == 0 and subStrikes > 0:
+        Strike(subLightningColor)
+        subStrikes -= 1
+      elif subStrikes == 0:
+        if random.randint(0, 4) == 0:
+          Strike([int((c * 1.25) + 0.5) for c in currentColor])
+
+      if currentColor == [0, 0, 0]:
+        config.stripLayersLocks[X].acquire()
+        for i in range(illuminationArea[0], illuminationArea[1]):
+          config.stripLayers[X][i] = None
+        config.stripLayersLocks[X].release()
+        lightningOver = False
+
+    iteration += 1
 
     # Wait until the current frame has started rendering
     config.curFrameRendering.wait()
@@ -89,6 +155,34 @@ def Chase(input):
 
     # Wait until the current frame has started rendering
     config.curFrameRendering.wait()
+
+
+# void RunningLights(byte red, byte green, byte blue, int WaveDelay) {
+#     int Position = 0
+
+#     for(int j=0
+#         j < NUM_LEDS*2
+#         j++)
+#     {
+#         Position++
+#         // = 0
+#         // Position + Rate
+#         for(int i=0
+#             i < NUM_LEDS
+#             i++) {
+#             // sine wave, 3 offset waves make a rainbow!
+#             // float level = sin(i+Position) * 127 + 128
+#             // setPixel(i, level, 0, 0)
+#             // float level = sin(i+Position) * 127 + 128
+#             setPixel(i, ((sin(i+Position) * 127 + 128)/255)*red,
+#                      ((sin(i+Position) * 127 + 128)/255)*green,
+#                      ((sin(i+Position) * 127 + 128)/255)*blue)
+#         }
+
+#         showStrip()
+#         delay(WaveDelay)
+#     }
+# }
 
 def Color(input):
   X = int(input["layer"])
