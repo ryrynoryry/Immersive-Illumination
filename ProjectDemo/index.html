@@ -388,11 +388,20 @@
     </div>
     <input type="text" class="sequenceInput" placeholder="Enter Sequence Here">
     <label class="sequenceOutput" style="color: gray;">Nothing here yet</label>
+    <!-- Dynamic -->
+    <br>
+    <select id="selectSequence">
+      <option>No sequence</option>
+    </select>
+    <button onclick="listSequences()">List</button>
+    <button onclick="populateAll()">Create</button>
+    <div id="sequenceArea"></div>
   </div>
 
 <script src="old.js"></script>
 <script src="script.js"></script>
 <script src="lights.js"></script>
+<script src="dynamic.js"></script>
 <script src="BufferLoader.js"></script>
 <!-- <script src="webaudio.js"></script> -->
 <script src="rate.js"></script>

@@ -1,0 +1,17 @@
+{
+  "sequence": "colorfill",
+  "layer": 0,
+  "displayName": "Fill",
+  "html": [
+    {
+      "name": "Color",
+      "element": "color",
+      "value": "#00e090"
+    },
+    {
+      "name": "PercentColored",
+      "element": "range",
+      "value": 50
+    }
+  ]
+}

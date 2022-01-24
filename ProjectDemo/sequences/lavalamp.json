@@ -1,0 +1,22 @@
+{
+  "sequence": "lavalamp",
+  "layer": 0,
+  "displayName": "Lava Lamp",
+  "html": [
+    {
+      "name": "Color1",
+      "element": "color",
+      "value": "#00e090"
+    },
+    {
+      "name": "Color2",
+      "element": "color",
+      "value": "#ff00ff"
+    },
+    {
+      "name": "Speed",
+      "element": "range",
+      "value": 50
+    }
+  ]
+}
