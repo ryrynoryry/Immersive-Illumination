@@ -40,9 +40,9 @@ Threading globals
 """
 run = True
 
-layerManager2 = []
+layerManager = []
 for i in range(NUM_LAYERS):
-  layerManager2.append({"layer": i,
+  layerManager.append({"layer": i,
                         "name": "", "nameChanged": False,
                         "args": [], "argsChanged": False,
                         "newAnimation": threading.Event()})

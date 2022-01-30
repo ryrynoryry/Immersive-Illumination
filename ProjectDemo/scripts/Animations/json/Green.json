@@ -1,0 +1,11 @@
+{
+  "sequence": "Green",
+  "layer": "0",
+  "html": [
+    {
+      "name": "NumPixels",
+      "element": "number",
+      "value": 3
+    }
+  ]
+}

@@ -12,8 +12,8 @@ class BaseAnimation():
     self.looping = False
 
   def Setup(self, args):
-    raise NotImplementedError(
-      "Do not use BaseSequence directly, use a subclass with setup() implemented")
+    # If a subclass does not have Setup() implemented, no action will be taken
+    pass
 
   def Step(self):
     raise NotImplementedError(
@@ -21,11 +21,9 @@ class BaseAnimation():
 
   def AquireLock(self):
     self.lock.acquire()
-    pass
 
   def ReleaseLock(self):
     self.lock.release()
-    pass
 
   def WaitForRenderingStart(self):
     curFrameRendering.wait()
@@ -36,6 +34,10 @@ class BaseAnimation():
   def FrameSync(self):
     curFrameRendering.wait()
     prevFrameRendered.wait()
+
+  def ToRGB(self, hex):
+    r, g, b = bytes.fromhex(hex.replace('#', ''))
+    return (r, g, b)
 
   def Wheel(self, position, random=False):
     r = 0
@@ -59,3 +61,10 @@ class BaseAnimation():
 
   def __repr__(self):
     return self.name
+
+  def __del__(self):
+    print('Destructor called: ' + self.name)
+    self.AquireLock()
+    for i in range(self.NUM_PIXELS):
+      self.strip[i] = None
+    self.ReleaseLock()

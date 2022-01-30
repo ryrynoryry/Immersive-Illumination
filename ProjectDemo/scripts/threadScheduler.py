@@ -8,6 +8,8 @@ import json
 import sys
 import importlib
 
+from Animations import Error
+
 def PollLEDSequence(path):
   """
   function to repeatedly read the LED_Sequence file to see which mode is selected and start the particular thread
@@ -58,20 +60,20 @@ def PollLEDSequence(path):
         localSequence = jsonDict["sequence"]
 
         # Perform actions if the layer needs changing
-        if localSequence != config.layerManager2[localLayer]["name"]:
+        if localSequence != config.layerManager[localLayer]["name"]:
 
-         config.layerManager2[localLayer]["name"] = localSequence
-         config.layerManager2[localLayer]["nameChanged"] = True
+         config.layerManager[localLayer]["name"] = localSequence
+         config.layerManager[localLayer]["nameChanged"] = True
 
-         config.layerManager2[localLayer]["args"] = jsonDict["html"]
-         config.layerManager2[localLayer]["argsChanged"] = True
+         config.layerManager[localLayer]["args"] = jsonDict["html"]
+         config.layerManager[localLayer]["argsChanged"] = True
 
-         config.layerManager2[localLayer]["newAnimation"].set()
+         config.layerManager[localLayer]["newAnimation"].set()
 
         else:
-          if jsonDict["html"] != config.layerManager2[localLayer]["args"]:
-            config.layerManager2[localLayer]["args"] = jsonDict["html"]
-            config.layerManager2[localLayer]["argsChanged"] = True
+          if jsonDict["html"] != config.layerManager[localLayer]["args"]:
+            config.layerManager[localLayer]["args"] = jsonDict["html"]
+            config.layerManager[localLayer]["argsChanged"] = True
           # else:
           #   print(f'Continuing sequence: <{LEDSequence}>')
     else:
@@ -85,26 +87,34 @@ def ManageLayer(layer):
   animationLooping = False
   animation = None
   while config.run:
-    if config.layerManager2[layer]["nameChanged"]:
-      animation = ChangeAnimation(config.layerManager2[layer])
-      animationLooping = animation.looping
 
-    if config.layerManager2[layer]["argsChanged"]:
-      UpdateAnimation(animation, config.layerManager2[layer])
+    if config.layerManager[layer]["nameChanged"]:
+      animation = ChangeAnimation(config.layerManager[layer])
+      animationLooping = animation.looping
+    if config.layerManager[layer]["argsChanged"]:
+      UpdateAnimation(animation, config.layerManager[layer])
+
     if animation is not None:
-      animation.FrameSync()
       animationComplete = animation.Step()
+      animation.FrameSync()
     if animationComplete and not animationLooping:
-      config.layerManager2[layer]["newAnimation"].clear()
-      config.layerManager2[layer]["newAnimation"].wait()
+      config.layerManager[layer]["newAnimation"].clear()
+      config.layerManager[layer]["newAnimation"].wait()
 
 def ChangeAnimation(layerConfig):
   newClassName = layerConfig["name"]
   myModule = None
+  animationClass = None
   if "Animations." + newClassName not in sys.modules:
     importlib.invalidate_caches()
-    myModule = importlib.import_module("Animations." + newClassName)
-  animationClass = getattr(myModule, newClassName)
+    try:
+      myModule = importlib.import_module("Animations." + newClassName)
+    except ModuleNotFoundError:
+      myModule = Error
+      newClassName = "Error"
+    animationClass = getattr(myModule, newClassName)
+  else:
+    animationClass = getattr(sys.modules["Animations." + newClassName], newClassName)
   layerConfig["nameChanged"] = False
   return animationClass(layerConfig["layer"], layerConfig["args"])
 
@@ -155,14 +165,6 @@ if __name__ == "__main__":
     time.sleep(0.01)
     pass
   print("Keyboard loop has exited")
-
-  # for layer in config.layerManager:
-  #   if layer["thread"] is not None:
-  #     print(f'Closing layer {config.layerManager.index(layer)} thread: {layer["thread"].name}')
-  #     layer["run"] = False
-  #     layer["thread"].join()
-  #     layer["thread"] = None
-  #     layer["sequence"] = ''
 
   config.run = False
 
