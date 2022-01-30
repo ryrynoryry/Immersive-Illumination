@@ -36,8 +36,18 @@ class BaseAnimation():
     prevFrameRendered.wait()
 
   def ToRGB(self, hex):
-    r, g, b = bytes.fromhex(hex.replace('#', ''))
+    r,g,b = (None,None,None)
+    if isinstance(hex, str):
+      r, g, b = bytes.fromhex(hex.replace('#', ''))
+    else:
+      r = hex[0]
+      g = hex[1]
+      b = hex[2]
     return (r, g, b)
+
+  def Lerp(self, start, end, t=0.5):
+    # (1-t) * start + t * end
+    return [(1-t) * start[i] + t * end[i] for i in range(min(len(start), len(end)))]
 
   def Wheel(self, position, random=False):
     r = 0

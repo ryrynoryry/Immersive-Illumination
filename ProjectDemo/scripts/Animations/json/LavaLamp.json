@@ -1,0 +1,15 @@
+{
+  "sequence": "LavaLamp",
+  "layer": "2",
+  "html": [
+    {
+      "value": [255,0,0]
+    },
+    {
+      "value": [0,0,255]
+    },
+    {
+      "value": 1
+    }
+  ]
+}
