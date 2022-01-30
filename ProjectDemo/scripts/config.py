@@ -38,10 +38,15 @@ layerAnimationSpeed = [1.0] * NUM_LAYERS
 """
 Threading globals
 """
-layerManager = []
-for i in range(NUM_LAYERS):
-  layerManager.append({"sequence": "", "thread": None, "run": True})
 run = True
+
+layerManager2 = []
+for i in range(NUM_LAYERS):
+  layerManager2.append({"layer": i,
+                        "name": "", "nameChanged": False,
+                        "args": [], "argsChanged": False,
+                        "newAnimation": threading.Event()})
+
 
 """
 Misc
