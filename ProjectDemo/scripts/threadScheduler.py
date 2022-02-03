@@ -70,12 +70,13 @@ def PollLEDSequence(path):
 
          config.layerManager[localLayer]["newAnimation"].set()
 
-        else:
-          if jsonDict["html"] != config.layerManager[localLayer]["args"]:
+        elif jsonDict["html"] != config.layerManager[localLayer]["args"]:
             config.layerManager[localLayer]["args"] = jsonDict["html"]
             config.layerManager[localLayer]["argsChanged"] = True
-          # else:
-          #   print(f'Continuing sequence: <{LEDSequence}>')
+
+            config.layerManager[localLayer]["newAnimation"].set()
+        # else:
+        #   print(f'Continuing sequence: <{LEDSequence}>')
     else:
       print(f"Invalid JSON: {jsonStringInput}")
 

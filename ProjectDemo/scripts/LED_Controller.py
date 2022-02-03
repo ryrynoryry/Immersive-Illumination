@@ -131,7 +131,7 @@ def RenderPixels(localStripLayers):
 
 def RenderLoop():
   FRAME_RATE = 1 / 60 # 60Hz (Reality is slower than this. ~15ms per frame)
-  localLayers = [None] * config.NUM_LAYERS
+  localLayers = [[None] * config.NUM_PIXELS for i in config.LAYER_RANGE]
 
   InitializePixels(1.0)
 

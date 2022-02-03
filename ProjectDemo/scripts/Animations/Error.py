@@ -32,3 +32,4 @@ class Error(BaseAnimation):
     for i in range(self.NUM_PIXELS):
       self.strip[i] = (0,0,0)
     self.ReleaseLock()
+    self.stepCount = 0

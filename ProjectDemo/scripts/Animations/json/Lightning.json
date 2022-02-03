@@ -1,0 +1,11 @@
+{
+  "sequence": "Lightning",
+  "layer": "1",
+  "html": [
+    {
+      "name": "illuminationArea",
+      "element": "number",
+      "value": [3,8]
+    }
+  ]
+}
