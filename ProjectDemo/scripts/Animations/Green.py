@@ -2,10 +2,10 @@ from .BaseAnimation import BaseAnimation
 
 class Green(BaseAnimation):
   def __init__(self, layer, args):
-      super().__init__(layer)
-      self.name = "Green"
-      self.looping = True
-      self.numPixels = args[0]["value"]
+    super().__init__(layer)
+    self.name = "Green"
+    self.looping = True
+    self.numPixels = args[0]["value"]
 
   def Step(self):
     self.AquireLock()

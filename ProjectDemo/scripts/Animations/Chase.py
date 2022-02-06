@@ -2,11 +2,10 @@ from .BaseAnimation import BaseAnimation
 
 class Chase(BaseAnimation):
   def __init__(self, layer, args):
-        super().__init__(layer)
-        self.name = "Chase"
-        self.layer = layer
-        self.looping = True
-        self.pos = 0
+    super().__init__(layer)
+    self.name = "Chase"
+    self.looping = True
+    self.pos = 0
 
   def Step(self):
     self.AquireLock()

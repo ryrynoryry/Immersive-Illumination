@@ -1,0 +1,11 @@
+{
+  "sequence": "ColorFill",
+  "layer": "0",
+  "html": [
+    {
+      "name": "Color",
+      "element": "color",
+      "value": "#0000FF"
+    }
+  ]
+}

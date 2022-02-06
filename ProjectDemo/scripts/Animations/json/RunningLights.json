@@ -1,0 +1,21 @@
+{
+  "sequence": "RunningLights",
+  "layer": "0",
+  "html": [
+    {
+      "name": "Color",
+      "element": "color",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "Frequency",
+      "element": "number",
+      "value": 1.0
+    },
+    {
+      "name": "Reverse",
+      "element": "number",
+      "value": false
+    }
+  ]
+}

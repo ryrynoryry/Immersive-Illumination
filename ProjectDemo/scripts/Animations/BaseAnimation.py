@@ -35,6 +35,10 @@ class BaseAnimation():
     curFrameRendering.wait()
     prevFrameRendered.wait()
 
+  def Fill(self, color):
+    for i in range(self.NUM_PIXELS):
+      self.strip[i] = color
+
   def ToRGB(self, hex):
     r,g,b = (None,None,None)
     if isinstance(hex, str):
