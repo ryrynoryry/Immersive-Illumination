@@ -1,14 +1,21 @@
 {
   "sequence": "LavaLamp",
   "layer": "2",
+  "displayName": "LavaLamp",
   "html": [
     {
-      "value": [255,0,0]
+      "name": "StartColor",
+      "element": "color",
+      "value": "#FF0000"
     },
     {
-      "value": [0,0,255]
+      "name": "EndColor",
+      "element": "color",
+      "value": "#0000FF"
     },
     {
+      "name": "Speed",
+      "element": "range",
       "value": 1
     }
   ]

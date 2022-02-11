@@ -1,11 +1,17 @@
 {
   "sequence": "Lightning",
   "layer": "1",
+  "displayName": "Lightning",
   "html": [
     {
-      "name": "illuminationArea",
+      "name": "IlluminationAreaStart",
       "element": "number",
-      "value": [3,8]
+      "value": 3
+    },
+    {
+      "name": "IlluminationAreaEnd",
+      "element": "number",
+      "value": 8
     }
   ]
 }

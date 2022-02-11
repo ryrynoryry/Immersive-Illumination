@@ -1,6 +1,7 @@
 {
   "sequence": "ColorFill",
   "layer": "0",
+  "displayName": "Fill",
   "html": [
     {
       "name": "Color",

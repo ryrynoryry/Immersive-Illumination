@@ -6,7 +6,7 @@ class Lightning(BaseAnimation):
       super().__init__(layer)
       self.name = "Lightning"
       self.looping = False
-      self.illuminationArea = args[0]["value"] # [StartPos, EndPos]
+      self.illuminationArea = [args[0]["value"], args[1]["value"]] # [StartPos, EndPos]
       self.BRIGHTNESS = 1.0
       self.lightningOver = False
       self.originalLightningColor = (255, 255, 255)

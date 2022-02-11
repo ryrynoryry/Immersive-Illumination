@@ -40,7 +40,7 @@ def PollLEDSequence(path):
     except ValueError as e:
       # Check for exit condition
       if jsonStringInput == "exit":
-        exit() # Call to: LED_Sequences.exit()
+        config.run = False
       jsonCorrect = False
     else:
       if "sequence" in jsonDict and "layer" in jsonDict:

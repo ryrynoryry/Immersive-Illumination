@@ -3,10 +3,11 @@ var data;
 let sequenceFilenames = Array();
 let sequenceObjects = {}
 let displayedSequences = Array();
+const directoryPath = "scripts/Animations/json/";
 
 // Create a handler for when an option is selected from the dropdown.
 document.getElementById("selectSequence").onchange = function () {
-  populate(this.value);
+  populate(this.value + ".json");
 }
 
 // Create a handler when the dropdown is clicked, prompting the list to be populated.
@@ -25,7 +26,7 @@ function writeSequence(inputObj, sequenceName) {
     return true;
   });
 
-  UpdateJSONFile(JSON.stringify(sequenceObjects[fileName]), "sequences/" + sequenceName + ".json");
+  UpdateJSONFile(JSON.stringify(sequenceObjects[fileName]), directoryPath + sequenceName + ".json");
 }
 
 // Overwrite the contents of the specified file with the given text.
@@ -40,7 +41,7 @@ function UpdateJSONFile(text, name) {
 };
 
 function listSequences() {
-  $.get("sequences/", { _: new Date().getTime() }, function (result) {
+  $.get(directoryPath, { _: new Date().getTime() }, function (result) {
     // console.log(result + "\nRESULT END");
     sequenceFilenames = []
     $(result).find("td > a").each(function () {
@@ -53,8 +54,10 @@ function listSequences() {
   .done(function () {
     $('#selectSequence').empty();
     $('#selectSequence').append($("<option>No sequence</option>"));
+    let name = "";
     $.each(sequenceFilenames, function (i, p) {
-      $('#selectSequence').append($('<option></option>').val(p).html(p));
+      name = p.substr(0, p.length - 5);
+      $('#selectSequence').append($('<option></option>').val(name).html(name));
     });
   })
 }
@@ -92,7 +95,7 @@ function populateAll() {
 // Get the contents of the JSON file and display them in their own div.
 function populate(fileName) {
   if (!displayedSequences.includes(fileName)) {
-    $.getJSON("sequences/" + fileName, { _: new Date().getTime() }, function (result) {
+    $.getJSON(directoryPath + fileName, { _: new Date().getTime() }, function (result) {
       sequenceObjects[result.sequence] = result;
       console.log(result);
       $("#sequenceArea").append(`<div id=${result.sequence}></div>`);
