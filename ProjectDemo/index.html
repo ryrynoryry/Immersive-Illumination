@@ -16,14 +16,15 @@
   </head>
 
   <body>
-
-  <h1 id="title">Ryno's Project Demo</h1>
+    <header>
+      <button onclick="location.href='layout/layout.html'" type="button">Layout</button>
+      <h1 id="title" style="display: inline-block;">Ryno's Project Demo</h1>
+    </header>
 
   <div id="nav">
       <button id="oscBtn" onClick="{ let x = document.getElementById('oscSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Oscillator</button>
       <button id="volKickBtn" onClick="{ let x = document.getElementById('volKickSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Volume/Kick</button>
       <button id="rateBtn" onClick="{ let x = document.getElementById('rateSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Rate</button>
-      <button id="colorBtn" onClick="{ let x = document.getElementById('colorSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Color</button>
       <button id="demoBtn" onClick="{ let x = document.getElementById('demoSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Demo</button>
       <button id="filterBtn" onClick="{ let x = document.getElementById('filterSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Filter</button>
       <button id="clipBtn" onClick="{ let x = document.getElementById('clipSection'); if (!x.hidden) {x.hidden = true;} else {x.hidden = false;}}">Clips</button>
@@ -77,12 +78,6 @@
     <button id="pitchLoad">Load</button>
     <label> Playback rate: <input id="pitchRate" type="number" min="0.1" max="10" step="0.01" value="1"></label>
     <button id="pitchPlay">Play</button>
-  </div>
-  <p></p>
-
-  <div id="colorSection" hidden style="background-color:WhiteSmoke;">
-    <label id="colorLabel" for="colorSelector">Choose your color:</label>
-    <input type="color" id="colorSelector" name="colorSelector" value="#ff0000">
   </div>
   <p></p>
 

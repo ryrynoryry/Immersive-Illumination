@@ -148,17 +148,6 @@ musicBtn.onload = function () {
 }
 
 
-const colorSelector = document.querySelector("#colorSelector");
-let title = document.querySelector("#title");
-colorSelector.oninput = function() {
-  title.style.color = colorSelector.value;
-}
-
-const colorNav = document.querySelector("#colorBtn");
-colorSelector.onchange = function() {
-  colorNav.style.backgroundColor = colorSelector.value;
-}
-
 // DEMO SECTION
 let demoAudioCtx;
 let demoBufferSource;

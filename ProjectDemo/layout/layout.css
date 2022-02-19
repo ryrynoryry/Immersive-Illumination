@@ -1,0 +1,41 @@
+/* body {
+  background-image: url("../img/tallRainUmbrella.jpg");
+  background-color: #000046;
+  background-size:     contain;
+  background-repeat:   no-repeat;
+  background-position: top center;
+  overflow: hidden;
+} */
+
+h1 {
+  color: white;
+  text-align: center;
+}
+
+/* #imageContainer {
+  background-image: url("../img/tallRainUmbrella.jpg");
+  background-color: #000046;
+  background-size:     contain;
+  background-repeat:   no-repeat;
+  background-position: top center;
+} */
+
+#sound {
+  background: rgb(2,0,36);
+  background: linear-gradient(0deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 45%, rgba(0,64,150,1) 100%);
+}
+
+/* #sound > div > .dropdown */
+#sound > h2, #sound > div > h3, #sound > div > h4, #sound > div > label {
+  color: lightblue;
+}
+
+#lights {
+    background: rgb(2,0,36);
+    background: linear-gradient(180deg, rgba(2,0,36,1) 0%, rgba(2,0,36,1) 9%, rgba(39,9,121,1) 45%, rgba(67,0,150,1) 100%);
+
+}
+#lights > h2, #lights > label {
+  color: lightblue;
+}
+
