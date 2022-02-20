@@ -3,7 +3,14 @@
   <head>
     <title>Ryno's Project Demo</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <!-- Homescreen bookmark fullscreen -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 
     <link rel="shortcut icon" href="favicon/favicon.ico">
     <link rel="icon" type="image/ico" href="favicon/favicon.ico">
@@ -53,65 +60,140 @@
       <h2>Rain Sounds</h2>
 
       <div class="w3-quarter">
+        <!-- TODO: Remove all these hidden icons in favor of a single object that changes -->
         <button class="w3-hide" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
              <i class="fa fa-5x fa-pause-circle-o" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
         <button class="w3-hide" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
              <i class="fa fa-5x fa-pause-circle" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
         <button class="w3-hide" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
              <i class="fa fa-5x fa-play-circle" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
-        <button class="" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
+        <button id="controllerButton" class="" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
              <i class="fa fa-5x fa-play-circle-o" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
         <button class="w3-hide" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
              <i class="fa fa-5x fa-spinner fa-pulse"
                 style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
       </div>
+
+      <p id="mockTimeLabel" hidden>Current context time: Context not created.</p>
+      <div id="mockSoundList" hidden>
+      </div>
+
 <!-- linear-gradient(#eee, #333); -->
-      <div class="w3-quarter">
-        <h3 style="margin: 0px;">Volume</h3>
-        <h5 style="margin: 0px;">100%</h5>
-        <input type="range" style="width: 75vw;">
+      <div id="mockMainSliders" class="w3-quarter">
+        <div class="gain">
+          <h3 class="label" style="margin: 0px;">Volume</h3>
+          <h5 class="val" style="margin: 0px;">100</h5>
+          <input class="slider" type="range" min="-0" max="100" value="100" style="width: 75vw;">
+        </div>
       </div>
 
-      <div class="w3-quarter">
-        <h3 style="margin-bottom: 0px;">Thunder Frequency</h3>
-        <h5 style="margin: 0px;" >100%</h5>
-        <input type="range" style="width: 75vw;">
-      </div>
-
+      <!-- TODO: Convert the w3 dropdown to custom show/hide -->
       <div class="w3-dropdown-hover">
-        <button class="w3-button dropdown" title="Advanced">Advanced Sound <i class="fa fa-caret-down"></i></button>
-        <div class="w3-dropdown-content w3-display-bottommiddle" style="width: 100vw; position: absolute; top: 5ch;">
-          <!-- TODO: Clickable background to clear the dropdown -->
-          <div class="" style="width: 100%; position: absolute; top: -100vh; background-color: rgba(255, 0, 0, 0.25);"> 
-            <div class="w3-card-4 w3-bar-block w3-blue" style="width: 50%; margin: 100vh auto;">
-              <div class="w3-bar-item w3-center">
-                <h4>Bass</h4>
-                <input type="range">
-                <p style="display: inline-block;">100%</p>
-              </div>
-              <div class="w3-bar-item w3-center">
-                <h4>Mid</h4>
-                <input type="range">
-                <p style="display: inline-block;">100%</p>
-              </div>
-              <div class="w3-bar-item w3-center">
-                <h4>Treble</h4>
-                <input type="range">
-                <p style="display: inline-block;">100%</p>
-              </div>
-              <div class="w3-bar-item w3-center">
-                <button class="">Restart</button>
+        <button class="w3-button w3-margin-bottom" onclick="this.nextElementSibling.classList.remove('w3-hide');"
+          title="Advanced">Sound Settings <i class="fa fa-caret-down"></i></button>
+        <div class="w3-dropdown-content w3-display-bottommiddle"
+          style="width: 100vw; position: absolute; top: 5ch;">
+          <div onclick="this.parentElement.classList.add('w3-hide');"
+            style="width: 100%; position: absolute; top: -90vh; background-color: rgba(255, 0, 0, 0.25);">
+            <div id="advanced">
+              <div class="w3-card-4 w3-bar-block w3-blue" style="width: 75%; margin: 90vh auto;">
+                <div class="low w3-bar-item w3-center">
+                  <h4 class="label" style="margin-bottom: 0px;">Bass</h4>
+                  <p class="val" style="margin: 0px;">0</p>
+                  <input class="slider" type="range" min="-20" max="20" value="0" style="width: 75%;">
+                </div>
+                <div class="mid w3-bar-item w3-center">
+                  <h4 class="label" style="margin: 0px;">Mid</h4>
+                  <p class="val" style="margin: 0px;">0</p>
+                  <input class="slider" type="range" min="-20" max="20" value="0" style="width: 75%;">
+                </div>
+                <div class="high w3-bar-item w3-center">
+                  <h4 class="label" style="margin: 0px;">Treble</h4>
+                  <p class="val" style="margin: 0px;">0</p>
+                  <input class="slider" type="range" min="-20" max="20" value="0" style="width: 75%;">
+                </div>
+                <div class="w3-bar-item w3-center">
+                  <button id="mockStop" disabled class="">Restart</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      <div id="thunderSection">
+        <h3 class="" style="margin-bottom: 0px; margin-right: 1ch; display: inline; vertical-align: middle;">Thunder</h3>
+        <button id="thunderStart" class="w3-button" style="padding: 0px; border-radius: 100%; "><i class="fa fa-3x fa-toggle-off"></i></button>
+
+        <div id="thunderControls">
+          <div id="thunderSliders">
+            <div class="freq">
+              <h4 class="label" style="margin-bottom: 0px;">Interval</h4>
+              <h5 class="val" style="margin: 0px;">1</h5>
+              <input class="slider" type="range" min="1" max="30" value="1" style="width: 75vw;">
+            </div>
+          </div>
+
+          <!-- TODO: Convert the w3 dropdown to custom show/hide -->
+          <div class="w3-dropdown-hover">
+            <button class="w3-button w3-margin-bottom" onclick="this.nextElementSibling.classList.remove('w3-hide');"
+              title="Advanced">Thunder Settings <i class="fa fa-caret-down"></i></button>
+            <div class="w3-dropdown-content w3-display-bottommiddle"
+              style="width: 100vw; position: absolute; top: 5ch;">
+              <div onclick="this.parentElement.classList.add('w3-hide');"
+                style="width: 100%; position: absolute; top: -90vh; background-color: rgba(255, 0, 0, 0.25);">
+                <div id="thunderAdvanced">
+                  <div class="w3-card-4 w3-bar-block w3-blue" style="width: 75%; margin: 90vh auto;">
+                    <div class="gain w3-bar-item w3-center">
+                      <h4 class="label" style="margin-bottom: 0px;">Volume</h4>
+                      <p class="val" style="margin: 0px;">50</p>
+                      <input class="slider" type="range" min="-0" max="100" value="50" style="width: 75%;">
+                    </div>
+                    <div class="low w3-bar-item w3-center">
+                      <h4 class="label" style="margin: 0px;">Bass</h4>
+                      <p class="val" style="margin: 0px;">0</p>
+                      <input class="slider" type="range" min="-20" max="20" value="0" style="width: 75%;">
+                    </div>
+                    <div class="mid w3-bar-item w3-center">
+                      <h4 class="label" style="margin: 0px;">Mid</h4>
+                      <p class="val" style="margin: 0px;">0</p>
+                      <input class="slider" type="range" min="-20" max="20" value="0" style="width: 75%;">
+                    </div>
+                    <div class="high w3-bar-item w3-center">
+                      <h4 class="label" style="margin: 0px;">Treble</h4>
+                      <p class="val" style="margin: 0px;">0</p>
+                      <input class="slider" type="range" min="-20" max="20" value="0" style="width: 75%;">
+                    </div>
+                    <button id="triggerThunder" disable class="w3-margin">Thunder Now</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p id="mockClipsTimeLabel" hidden>Current context time: Context not created.</p>
+          <div id="mockClipList" hidden>
+          </div>
+        </div>
+      </div>
+
       <div class="w3-quarter w3-center">
         <h4>Timer</h4>
-        <input class="" type="number" placeholder="Hours" style="width: 7ch;">
+        <input class="" type="tel" placeholder="Hour" size="7" list="suggestedHours" maxlength="2" pattern="[0-9]*">
         <label>:</label>
-        <input class="" type="number" placeholder="Minutes" style="width: 7ch;"><br>
+        <input class="" type="tel" placeholder="Min" size="7" list="suggestedMinutes" maxlength="2" pattern="[0-9]*">
+        <br>
+        <datalist id="suggestedHours">
+          <option value="0">
+          <option value="1">
+          <option value="2">
+          <option value="8">
+        </datalist>
+        <datalist id="suggestedMinutes">
+          <option value="5">
+          <option value="15">
+          <option value="30">
+        </datalist>
         <button>Start</button>
       </div>
     </div>
@@ -227,6 +309,14 @@
         }
       }
     </script>
+
+    <script src="old.js"></script>
+    <script src="layout.js"></script>
+    <script src="lights.js"></script>
+    <script src="dynamic.js"></script>
+    <script src="BufferLoader.js"></script>
+    <!-- <script src="webaudio.js"></script> -->
+    <script src="rate.js"></script>
 
   </body>
 

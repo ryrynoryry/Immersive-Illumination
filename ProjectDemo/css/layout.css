@@ -42,7 +42,11 @@ h1 {
   background: linear-gradient(#020024 0%, #0a143f 10%, #322fb3 40%, #451ab3 60%, #4e008a 80%, #a32942 100%);
   /*Bright Fuchsia: #FC466B*/
 }
+
 #lights > h2, #lights > label {
   color: lightblue;
 }
 
+input[type=tel]:invalid {
+  background-color: pink;
+}

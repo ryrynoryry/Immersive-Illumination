@@ -33,7 +33,7 @@ BufferLoader.prototype.loadBuffer = function(url, index) {
         // Add this audio data to the list for the BufferLoader
         loader.bufferList[index] = buffer;
         // If all of the files have been loaded, call the callback function
-        if (++loader.loadCount == loader.urlList.length) {
+        if (++(loader.loadCount) == loader.urlList.length) {
           loader.onLoad(loader.bufferList, loader.obj);
         }
         else if (loader.loadCount == 1) {
