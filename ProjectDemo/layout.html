@@ -47,8 +47,7 @@
     <div id="id01" class="w3-modal">
       <div class="w3-modal-content w3-card-4 w3-animate-top w3-transparent">
         <header class="w3-container w3-teal w3-display-container w3-center w3-margin">
-          <span onclick="document.getElementById('id01').style.display='none'"
-            class="w3-button w3-teal w3-display-topright"><i class="fa fa-remove"></i></span>
+          <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-teal w3-display-topright"><i class="fa fa-remove"></i></span>
           <h4>You pressed the heart!</h4>
           <h5>Thanks, I <i class="fa fa-heart"></i> you too!</h5>
         </header>
@@ -67,16 +66,15 @@
              <i class="fa fa-5x fa-pause-circle" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
         <button class="w3-hide" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
              <i class="fa fa-5x fa-play-circle" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
+        <button class="w3-hide" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
+             <i class="fa fa-5x fa-spinner fa-pulse" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
         <button id="controllerButton" class="" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
              <i class="fa fa-5x fa-play-circle-o" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
-        <button class="w3-hide" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
-             <i class="fa fa-5x fa-spinner fa-pulse"
-                style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
       </div>
 
       <p id="mockTimeLabel" hidden>Current context time: Context not created.</p>
       <div id="mockSoundList" hidden>
-      </div>
+    </div>
 
 <!-- linear-gradient(#eee, #333); -->
       <div id="mockMainSliders" class="w3-quarter">
@@ -89,12 +87,10 @@
 
       <!-- TODO: Convert the w3 dropdown to custom show/hide -->
       <div class="w3-dropdown-hover">
-        <button class="w3-button w3-margin-bottom" onclick="this.nextElementSibling.classList.remove('w3-hide');"
-          title="Advanced">Sound Settings <i class="fa fa-caret-down"></i></button>
-        <div class="w3-dropdown-content w3-display-bottommiddle"
-          style="width: 100vw; position: absolute; top: 5ch;">
+        <button class="w3-button" onclick="this.nextElementSibling.classList.remove('w3-hide');">Sound Settings <i class="fa fa-caret-down"></i></button>
+        <div class="w3-dropdown-content w3-display-bottommiddle" style="width: 100vw; position: absolute; top: 5ch;">
           <div onclick="this.parentElement.classList.add('w3-hide');"
-            style="width: 100%; position: absolute; top: -90vh; background-color: rgba(255, 0, 0, 0.25);">
+            style="width: 100%; position: absolute; top: -90vh; background-color: #00000040;">
             <div id="advanced">
               <div class="w3-card-4 w3-bar-block w3-blue" style="width: 75%; margin: 90vh auto;">
                 <div class="low w3-bar-item w3-center">
@@ -121,7 +117,7 @@
         </div>
       </div>
 
-      <div id="thunderSection">
+      <div id="thunderSection" style="margin-top: 2ch;">
         <h3 class="" style="margin-bottom: 0px; margin-right: 1ch; display: inline; vertical-align: middle;">Thunder</h3>
         <button id="thunderStart" class="w3-button" style="padding: 0px; border-radius: 100%; "><i class="fa fa-3x fa-toggle-off"></i></button>
 
@@ -136,12 +132,9 @@
 
           <!-- TODO: Convert the w3 dropdown to custom show/hide -->
           <div class="w3-dropdown-hover">
-            <button class="w3-button w3-margin-bottom" onclick="this.nextElementSibling.classList.remove('w3-hide');"
-              title="Advanced">Thunder Settings <i class="fa fa-caret-down"></i></button>
-            <div class="w3-dropdown-content w3-display-bottommiddle"
-              style="width: 100vw; position: absolute; top: 5ch;">
-              <div onclick="this.parentElement.classList.add('w3-hide');"
-                style="width: 100%; position: absolute; top: -90vh; background-color: rgba(255, 0, 0, 0.25);">
+            <button class="w3-button" onclick="this.nextElementSibling.classList.remove('w3-hide');">Thunder Settings <i class="fa fa-caret-down"></i></button>
+            <div class="w3-dropdown-content w3-display-bottommiddle" style="width: 100vw; position: absolute; top: 5ch;">
+              <div onclick="this.parentElement.classList.add('w3-hide');" style="width: 100%; position: absolute; top: -90vh; background-color: #00000040;">
                 <div id="thunderAdvanced">
                   <div class="w3-card-4 w3-bar-block w3-blue" style="width: 75%; margin: 90vh auto;">
                     <div class="gain w3-bar-item w3-center">
@@ -177,7 +170,7 @@
         </div>
       </div>
 
-      <div class="w3-quarter w3-center">
+      <div class="w3-quarter w3-center" style="margin-top: 2ch;">
         <h4>Timer</h4>
         <input class="" type="tel" placeholder="Hour" size="7" list="suggestedHours" maxlength="2" pattern="[0-9]*">
         <label>:</label>
