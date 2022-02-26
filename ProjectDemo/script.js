@@ -542,14 +542,14 @@ thunderFrequencySldr.oninput = function() {
 // Starts a thunder clip within the next period and schedules the one after.
 function PlayThunder(obj) {
   if (obj.sounds.length == 0) {
-    ScheduleClip(obj);
-    ScheduleClip(obj, 5);
+    ScheduleThunder(obj);
+    ScheduleThunder(obj, 5);
   }
 }
 
 // Schedules a random sound clip up to the frequency value from now plus whatever delay was passed.
 // When the sound ends, the next one will be scheduled.
-function ScheduleClip(obj, extraDelay = 0, now = false) {
+function ScheduleThunder(obj, extraDelay = 0, now = false) {
   let sound = new Object();
   sound.buffersource = obj.audioCtx.createBufferSource();
   sound.buffersource.buffer = obj.buffers[GetRandomIntInclusive(0,obj.buffers.length-1)];
@@ -560,15 +560,14 @@ function ScheduleClip(obj, extraDelay = 0, now = false) {
       if (thisIndex != -1) {
         obj.sounds.splice(thisIndex, 1);
       }
-      ScheduleClip(obj);
+      ScheduleThunder(obj);
     }
   }
   let clearRandom = (now == true ? 0 : 1);
   let delay = GetRandomIntInclusive(0, thunderFrequencySldr.value * clearRandom) + extraDelay;
   let time = obj.audioCtx.currentTime + delay;
   sound.buffersource[sound.buffersource.start ? 'start' : 'noteOn'](time);
-  // TODO: start short silence and use on ended to trigger flash.
-  setTimeout(FlashThunder, (time/1000));
+  ScheduleLightning(delay);
 
   console.log(obj.prefix + " Buf Length: " + (obj.sounds.length + 1) + ". Scheduled a sound to play at: " + time + "(" + delay+")");
 
@@ -603,6 +602,8 @@ thunderToggleBtn.onclick = function () {
       ThunderObj.isPlaying = false;
       ThunderObj.statusLabel = thunderToggleBtn;
       ThunderObj.audioCtx.suspend();
+
+      CreateSilenceContext();
     }
     if (ThunderObj.buffers.length == 0) {
       const dir = "clips";
@@ -634,6 +635,7 @@ function StopThunder(obj) {
     obj.audioCtx.suspend();
     obj.isPlaying = false;
   }
+  SuspendLightning();
 }
 
 const thunderLow = thunderSettings.querySelector(".low");
@@ -661,7 +663,7 @@ thunderGain.querySelector(".slider").oninput = function() {
 
 thunderSettings.querySelector("#triggerThunder").onclick = function() {
   if (CheckIfContextExists(ThunderObj) && ThunderObj.buffers.length > 0) {
-    ScheduleClip(ThunderObj,0,true);
+    ScheduleThunder(ThunderObj,0,true);
   }
 }
 
@@ -675,5 +677,85 @@ function FlashThunder() {
     setTimeout(function () {
       document.querySelector("#thunderSection").style.backgroundColor = "#FFFFFF00";
     }, time * 100 + 50);
+  }
+}
+
+let SilenceSound = {
+  audioCtx: undefined,
+  gainNode: undefined,
+  bufferSource: undefined,
+  buffer: undefined,
+  instances: 0 // Number of active lightning events
+}
+
+function CreateSilenceContext() {
+  if (CheckIfContextExists(SilenceSound) == false) {
+    AudioContext = window.AudioContext || window.webkitAudioContext;
+    SilenceSound.audioCtx = new AudioContext();
+    SilenceSound.gainNode = SilenceSound.audioCtx.createGain();
+    SilenceSound.gainNode.connect(SilenceSound.audioCtx.destination);
+    SilenceSound.gainNode.gain.value = 0.0;
+    SilenceSound.audioCtx.suspend();
+    var audio = new Audio('silence/10-milliseconds-of-silence.mp3');
+    audio.play();
+
+    // Load buffer asynchronously
+    var request = new XMLHttpRequest();
+    request.open("GET", "silence/10-milliseconds-of-silence.mp3", true);
+    request.responseType = "arraybuffer";
+
+    request.onload = function () {
+      // Asynchronously decode the audio file data in request.response
+      SilenceSound.audioCtx.decodeAudioData(request.response,
+        // Function to call on success
+        function (buffer) {
+          if (!buffer) {
+            alert('error decoding file data: ' + url);
+            return;
+          }
+          SilenceSound.buffer = buffer
+          console.log("Silence loaded.");
+        },
+        // Function to call on error
+        function (error) {
+          console.error('decodeAudioData error', error);
+        }
+      );
+    }
+
+    request.onerror = function () {
+      alert('BufferLoader: XHR error');
+    }
+
+    request.send();
+  }
+}
+
+function ScheduleLightning(delay = 0) {
+  SilenceSound.instances++;
+  SilenceSound.bufferSource = SilenceSound.audioCtx.createBufferSource();
+  SilenceSound.bufferSource.buffer = SilenceSound.buffer;
+  SilenceSound.bufferSource.connect(SilenceSound.gainNode);
+
+  SilenceSound.bufferSource.onended = function () {
+    FlashThunder();
+    SilenceSound.instances--;
+    if (SilenceSound.instances == 0) {
+      SilenceSound.audioCtx.suspend();
+    }
+  }
+
+  let time = SilenceSound.audioCtx.currentTime + delay;
+  SilenceSound.audioCtx.resume();
+  SilenceSound.bufferSource[SilenceSound.bufferSource.start ? 'start' : 'noteOn'](time);
+}
+
+function SuspendLightning()
+{
+  if (CheckIfContextExists(SilenceSound)) {
+    SilenceSound.bufferSource.onended = null;
+    SilenceSound.bufferSource.stop();
+    SilenceSound.instances = 0;
+    SilenceSound.audioCtx.suspend();
   }
 }
