@@ -26,7 +26,7 @@ function writeSequence(inputObj, sequenceName) {
     return true;
   });
 
-  UpdateJSONFile(JSON.stringify(sequenceObjects[fileName]), directoryPath + sequenceName + ".json");
+  UpdateJSONFile(JSON.stringify(sequenceObjects[sequenceName]), directoryPath + sequenceName + ".json");
 }
 
 // Overwrite the contents of the specified file with the given text.
@@ -36,7 +36,7 @@ function UpdateJSONFile(text, name) {
       // console.log('File: ' + name + ' updated to: "' + text + '" Response: ' + result);
   })
   .fail(function(xhr) {
-    console.log("Error: '" + phpFile + "': " + xhr.status + " " + xhr.statusText);
+    console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
   })
 };
 

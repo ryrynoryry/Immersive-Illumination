@@ -668,16 +668,25 @@ thunderSettings.querySelector("#triggerThunder").onclick = function() {
 }
 
 function FlashThunder() {
-  console.log("Thunder at: " + ThunderObj.audioCtx.currentTime);
-  for (let time = 0; time < 3; time++) {
-    setTimeout(function () {
-      document.querySelector("#thunderSection").style.backgroundColor = "#FFFFFF";
-    }, time * 100);
+  // console.log("Thunder at: " + ThunderObj.audioCtx.currentTime);
+  // for (let time = 0; time < 3; time++) {
+  //   setTimeout(function () {
+  //     document.querySelector("#thunderSection").style.backgroundColor = "#FFFFFF";
+  //   }, time * 100);
 
-    setTimeout(function () {
-      document.querySelector("#thunderSection").style.backgroundColor = "#FFFFFF00";
-    }, time * 100 + 50);
-  }
+  //   setTimeout(function () {
+  //     document.querySelector("#thunderSection").style.backgroundColor = "#FFFFFF00";
+  //   }, time * 100 + 50);
+  // }
+  // Copy lightning json file for Python to catch and display.
+  $.post("copyFile.php", { originalName: "Lightning.json", source: "scripts/Animations/json/", destination: "transfer/", newName: "LED_Sequence"},
+    function (result) {
+      console.log(result);
+  })
+  .fail(function(xhr) {
+    console.log("Error: '" + "copyFile.php" + "': " + xhr.status + " " + xhr.statusText);
+  })
+
 }
 
 let SilenceSound = {
