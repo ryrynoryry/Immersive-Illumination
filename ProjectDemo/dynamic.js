@@ -95,18 +95,53 @@ function populateAll() {
 // Get the contents of the JSON file and display them in their own div.
 function populate(fileName) {
   if (!displayedSequences.includes(fileName)) {
+    // Use time object to prevent caching.
     $.getJSON(directoryPath + fileName, { _: new Date().getTime() }, function (result) {
       sequenceObjects[result.sequence] = result;
       console.log(result);
-      $("#sequenceArea").append(`<div id=${result.sequence}></div>`);
-      $(`#${result.sequence}`).append(`<h2>${result.displayName}</h2>`);
+      // Create outer container for this sequence.
+      $("#sequenceArea").append(`<div id=${result.sequence} class="w3-margin-bottom " style="border: grey; border-style: solid; background-color: lightblue;"></div>`);
+      // Create inner buttons.
+      $(`#${result.sequence}`).append(`<button class="fa fa-lg fa-close w3-button w3-right w3-padding-small" onclick="CloseSequence('${fileName}', this)"></button>`); // Close
+      $(`#${result.sequence}`).append(`<button class="fa fa-lg fa-eye w3-button w3-right w3-padding-small"></button>`); // Hide
+      // Create layer button.
+      $(`#${result.sequence}`).append(`<div class="w3-left w3-padding-small w3-button" onclick="">
+                                        <div class="fa fa-clone w3-padding-small" style="transform: rotate(-135deg); position: absolute;"></div>
+                                        <label class="w3-margin-left w3-padding-small">1</label>
+                                       </div>`);
+      $(`#${result.sequence}`).append(`<h3>${result.displayName}</h3>`);
       $.each(result.html, function (i, item) {
-        $(`#${result.sequence}`).append(`<label for=${item.name}>${item.name}</label>`);
+        $(`#${result.sequence}`).append(`<label for=${item.name}>${item.name}</label> `);
         $(`#${result.sequence}`).append(`<input type=${item.element} id=${item.name} value=${item.value} oninput="writeSequence(this, '${result.sequence}')">`);
       })
     })
     .done(function () {
       displayedSequences.push(fileName)
     })
+  }
+}
+
+// Handles the closing of the sequence element.
+function CloseSequence(fileName, obj) {
+  let thisIndex = displayedSequences.indexOf(fileName);
+  if (thisIndex != -1) {
+    // Remove from the array.
+    displayedSequences.splice(thisIndex, 1);
+    // Remove the property from the container object.
+    delete sequenceObjects[obj.parentElement.id];
+    // Send "Clear"
+    //TODO: Send to the current layer.
+    $.post("copyFile.php", { originalName: "Clear.json", source: "scripts/Animations/json/", destination: "transfer/", newName: "LED_Sequence" },
+      function (result) {
+        console.log(result);
+      })
+      .fail(function (xhr) {
+        console.log("Error: '" + "copyFile.php" + "': " + xhr.status + " " + xhr.statusText);
+      })
+    // Remove the outer container from the HTML.
+    obj.parentElement.remove();
+  }
+  else {
+    console.log(fileName + " is not displayed.")
   }
 }

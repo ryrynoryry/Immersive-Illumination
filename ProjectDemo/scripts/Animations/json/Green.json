@@ -1,6 +1,7 @@
 {
   "sequence": "Green",
   "layer": "0",
+  "displayName": "Green",
   "html": [
     {
       "name": "NumPixels",

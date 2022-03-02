@@ -1,6 +1,7 @@
 {
   "sequence": "RunningLights",
   "layer": "0",
+  "displayName": "Running Lights",
   "html": [
     {
       "name": "Color",
