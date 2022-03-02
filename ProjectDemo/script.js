@@ -768,3 +768,39 @@ function SuspendLightning()
     SilenceSound.audioCtx.suspend();
   }
 }
+
+let debugClicks = 0;
+let debugMode = false;
+document.querySelector("#signoff").onclick = function() {
+  // Increment the click count.
+  ++debugClicks;
+
+  // Reset the click count back to 0 if not done correctly.
+  setTimeout(() => {
+    debugClicks = 0;
+  }, 1000);
+
+  // Triggered debug mode toggle.
+  if (debugClicks >= 5) {
+    // Toggle debug mode
+    debugMode = !debugMode;
+    // Keep subsequent clicks from re-triggering the toggle.
+    debugClicks = 0;
+
+    // Perform debug mode actions.
+    if (debugMode) {
+      //Unhide all debug elements.
+      document.querySelectorAll(".debug").forEach(function (el) {
+        el.hidden = false;
+      });
+      document.querySelector("#navBar").style.backgroundColor = "#FF0000";
+    }
+    else { // Reset back to normal operation.
+      document.querySelectorAll(".debug").forEach(function (el) {
+        el.hidden = true;
+      });
+      document.querySelector("#navBar").style.backgroundColor = "#000000";
+    }
+  }
+
+}
