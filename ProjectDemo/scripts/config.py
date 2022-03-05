@@ -14,6 +14,8 @@ stripInitialized = False
 prevFrameRendered = threading.Event()
 curFrameRendering = threading.Event()
 
+modulesLock = threading.Lock()
+
 """
 LED Strip representation
 """

@@ -3,9 +3,12 @@ File to contain all the LED library specific functionality
 """
 
 import time
-import tkinter # Simulated LED strip GUI
-# import board # Hardware interface
-# import neopixel # NeoPixel LED Library
+import os
+if os.name == 'nt': # On Windows
+  import tkinter # Simulated LED strip GUI
+else: # Linux on pi
+  import board # Hardware interface
+  import neopixel # NeoPixel LED Library
 
 import config
 import LED_SharedPatterns
@@ -15,94 +18,97 @@ canvas = None
 sqList = None
 
 def InitializePixels(pixelBrightness = 1.0):
-  # NeoPixels must be connected to pins D10, D12, D18 or D21 to work.
-  HARDWARE_PIN = board.D18
 
-  # The order of the pixel colors - RGB or GRB (RGBW or GRBW)
-  ORDER = neopixel.GRB
+  if os.name != 'nt':
+    # NeoPixels must be connected to pins D10, D12, D18 or D21 to work.
+    HARDWARE_PIN = board.D18
 
-  # Deallocate NeoPixel object before re-initializing it.
-  if config.stripInitialized:
-    config.LEDstrip.deinit()
-    pass
+    # The order of the pixel colors - RGB or GRB (RGBW or GRBW)
+    ORDER = neopixel.GRB
 
-  config.LEDstrip = neopixel.NeoPixel(
-      HARDWARE_PIN, config.NUM_PIXELS, brightness=pixelBrightness, auto_write=False, pixel_order=ORDER
-  )
-  # config.LEDstrip = [(0,0,0)] * config.NUM_PIXELS
+    # Deallocate NeoPixel object before re-initializing it.
+    if config.stripInitialized:
+      config.LEDstrip.deinit()
+      pass
+
+    config.LEDstrip = neopixel.NeoPixel(
+        HARDWARE_PIN, config.NUM_PIXELS, brightness=pixelBrightness, auto_write=False, pixel_order=ORDER
+    )
+  else:
+    # TKINTER
+    global root
+    global canvas
+    global sqList
+
+    root = tkinter.Tk(baseName="Virtual Strip")
+    root.configure(background='black') # Black background
+    root.title("Virtual Strip") # Title
+    root.attributes('-topmost', True) # Always on top
+    # root.overrideredirect(True) # Remove toolbar and clear from taskbar
+    root.geometry("+0+100")
+
+    canvas = tkinter.Canvas(root, bg="black", height=2*32, width=2500)
+    sqList = [None] * config.NUM_PIXELS
+    closeBtn = tkinter.Button(root, text="X", command=lambda:root.destroy(), background="gray")
+    closeBtn.place(x=0, y=0)
+
+    color = (255,128,64)
+    margin = 16
+    padding = 3
+    size = 32
+    for i in range(len(sqList)):
+      sqList[i] = canvas.create_rectangle(
+        i*size + margin + padding, # Left
+        margin, # Top
+        margin + (i+1)*size, # Right
+        margin + size, # Bottom
+        fill=LED_SharedPatterns.tuple2hex(color),
+        outline="#555555", width=2)
+    canvas.pack()
+
+    config.LEDstrip = [(0,0,0)] * config.NUM_PIXELS
 
   for i in range(config.NUM_PIXELS):
     config.LEDstrip[i] = (25, 25, 25)
-    config.LEDstrip.show()
+    UpdateStrip(config.LEDstrip)
 
   time.sleep(0.5)
 
-  config.LEDstrip.fill((0, 0, 0))
-  config.LEDstrip.show()
+  FillStrip(config.LEDstrip, (0, 0, 0))
+  UpdateStrip(config.LEDstrip)
   time.sleep(0.2)
 
 # Red
-  config.LEDstrip.fill((25, 0, 0))
-  config.LEDstrip.show()
+  FillStrip(config.LEDstrip, (25, 0, 0))
+  UpdateStrip(config.LEDstrip)
   time.sleep(0.3)
 
-  config.LEDstrip.fill((0, 0, 0))
-  config.LEDstrip.show()
+  FillStrip(config.LEDstrip, (0, 0, 0))
+  UpdateStrip(config.LEDstrip)
   time.sleep(0.2)
 # Green
-  config.LEDstrip.fill((0, 25, 0))
-  config.LEDstrip.show()
+  FillStrip(config.LEDstrip, (0, 25, 0))
+  UpdateStrip(config.LEDstrip)
   time.sleep(0.3)
 
-  config.LEDstrip.fill((0, 0, 0))
-  config.LEDstrip.show()
+  FillStrip(config.LEDstrip, (0, 0, 0))
+  UpdateStrip(config.LEDstrip)
   time.sleep(0.2)
 # Blue
-  config.LEDstrip.fill((0, 0, 25))
-  config.LEDstrip.show()
+  FillStrip(config.LEDstrip, (0, 0, 25))
+  UpdateStrip(config.LEDstrip)
   time.sleep(0.3)
 
-  config.LEDstrip.fill((0, 0, 0))
-  config.LEDstrip.show()
+  FillStrip(config.LEDstrip, (0, 0, 0))
+  UpdateStrip(config.LEDstrip)
   time.sleep(0.2)
 # White
-  config.LEDstrip.fill((50, 50, 50))
-  config.LEDstrip.show()
+  FillStrip(config.LEDstrip, (50, 50, 50))
+  UpdateStrip(config.LEDstrip)
   time.sleep(1.0)
 
-  config.LEDstrip.fill((0, 0, 0))
-  config.LEDstrip.show()
-
-# TKINTER
-  global root
-  global canvas
-  global sqList
-
-  root = tkinter.Tk(baseName="Virtual Strip")
-  root.configure(background='black') # Black background
-  root.title("Virtual Strip") # Title
-  root.attributes('-topmost', True) # Always on top
-  # root.overrideredirect(True) # Remove toolbar and clear from taskbar
-  root.geometry("+0+100")
-
-  canvas = tkinter.Canvas(root, bg="black", height=2*32, width=2500)
-  sqList = [None] * config.NUM_PIXELS
-  closeBtn = tkinter.Button(root, text="X", command=lambda:root.destroy(), background="gray")
-  closeBtn.place(x=0, y=0)
-
-  color = (255,128,64)
-  margin = 16
-  padding = 3
-  size = 32
-  for i in range(len(sqList)):
-    sqList[i] = canvas.create_rectangle(
-      i*size + margin + padding, # Left
-      margin, # Top
-      margin + (i+1)*size, # Right
-      margin + size, # Bottom
-      fill=LED_SharedPatterns.tuple2hex(color),
-      outline="#555555", width=2)
-  canvas.pack()
+  FillStrip(config.LEDstrip, (0, 0, 0))
+  UpdateStrip(config.LEDstrip)
 
   config.stripInitialized = True
 
@@ -125,12 +131,11 @@ def RenderPixels(localStripLayers):
       # If no break was reached, all values were None so set the pixel to zeros
       config.LEDstrip[i] = (0, 0, 0)
 
-  config.LEDstrip.show()
   UpdateStrip(config.LEDstrip)
-  # print(config.LEDstrip)
 
 def RenderLoop():
   FRAME_RATE = 1 / 60 # 60Hz (Reality is slower than this. ~15ms per frame)
+  # Create empty pixel layers.
   localLayers = [[None] * config.NUM_PIXELS for i in config.LAYER_RANGE]
 
   InitializePixels(1.0)
@@ -183,16 +188,30 @@ def RenderLoop():
     print("exiting RenderLoop thread")
 
 
+def FillStrip(strip, color):
+  if os.name == 'nt':
+    for i in config.PIXEL_RANGE:
+      strip[i] = color
+  else:
+    strip.fill(color)
+
 def UpdateStrip(strip):
-  global root
-  global canvas
-  global sqList
-  try:
-    for i in range(config.NUM_PIXELS):
-      canvas.itemconfigure(sqList[i], fill=LED_SharedPatterns.tuple2hex(strip[i]))
-    root.update()
-  except tkinter.TclError as e:
-    print("GUI was closed")
-    root.quit()
-    config.run = False
-    pass
+  if os.name == 'nt':
+    global root
+    global canvas
+    global sqList
+    try:
+      for i in range(config.NUM_PIXELS):
+        canvas.itemconfigure(sqList[i], fill=LED_SharedPatterns.tuple2hex(strip[i]))
+      root.update()
+    except tkinter.TclError as e:
+      print("GUI was closed")
+      root.quit()
+      config.run = False
+      pass
+  else:
+    strip.show()
+
+
+
+

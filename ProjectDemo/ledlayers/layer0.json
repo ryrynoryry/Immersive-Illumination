@@ -1,0 +1,12 @@
+{
+  "sequence": "Chase",
+  "layer": "0",
+  "displayName": "Chase",
+  "html": [
+    {
+      "name": "Color",
+      "element": "color",
+      "value": "#0000FF"
+    }
+  ]
+}

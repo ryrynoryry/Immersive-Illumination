@@ -15,89 +15,114 @@ def PollLEDSequence(path):
   function to repeatedly read the LED_Sequence file to see which mode is selected and start the particular thread
   """
   count = 0
-  filePath = path + "LED_Sequence"
   jsonDict = None
   jsonCorrect = False
   localLayer = None
   localSequence = None
   lastFileTime = None
+
+  # Array of flags to prevent console being drowned with error messages.
+  layerMismatched = [False] * config.NUM_LAYERS
+  invalidJson = [False] * config.NUM_LAYERS
+
   while config.run:
     count += 1
-
-    fileTime = os.stat(filePath).st_mtime
-    if lastFileTime != fileTime:
-      lastFileTime = fileTime
-    else:
-      time.sleep(1)
-      continue
-
-    with open(filePath, 'r') as f:
-      jsonStringInput = f.read()
-
-    # Parse json input
-    try:
-      jsonDict = json.loads(jsonStringInput)
-    except ValueError as e:
-      # Check for exit condition
-      if jsonStringInput == "exit":
-        config.run = False
-      jsonCorrect = False
-    else:
-      if "sequence" in jsonDict and "layer" in jsonDict:
-        jsonCorrect = True
-
-    if jsonCorrect:
-      # Input is in JSON format and contains the required fields.
-      try:
-        localLayer = int(jsonDict["layer"])
-      except ValueError:
-        # Layer element cannot be parsed to an int
-        localLayer = None
+    # Check each layer.
+    for l in config.LAYER_RANGE:
+      # Set the file name for this layer.
+      filePath = path + "layer" + str(l) + ".json"
+      # Check if the file has not been modified in a while.
+      fileTime = os.stat(filePath).st_mtime
+      if lastFileTime == fileTime:
+        # If so, sleep for a while then try again.
+        # TODO: Need to change this since the loop manages multiple layers.
+        # time.sleep(1)
+        continue
       else:
-        # Bound the layer to the max and min values
-        localLayer = max(localLayer, 0)  # Set Min
-        localLayer = min(localLayer, config.NUM_LAYERS - 1)  # Set Max
-        localSequence = jsonDict["sequence"]
+        lastFileTime = fileTime
 
-        # Perform actions if the layer needs changing
-        if localSequence != config.layerManager[localLayer]["name"]:
+      # Input the layer file contents.
+      with open(filePath, 'r') as f:
+        jsonStringInput = f.read()
 
-         config.layerManager[localLayer]["name"] = localSequence
-         config.layerManager[localLayer]["nameChanged"] = True
+      # Parse json input
+      try:
+        jsonDict = json.loads(jsonStringInput)
+      except ValueError as e: # Catch exception when the file is not in json format.
+        # Check for exit condition
+        if jsonStringInput == "exit":
+          config.run = False
+        jsonCorrect = False
+      else:  # Execute if no exception is caught
+        # Check required properties.
+        if "sequence" in jsonDict and "layer" in jsonDict:
+          jsonCorrect = True
 
-         config.layerManager[localLayer]["args"] = jsonDict["html"]
-         config.layerManager[localLayer]["argsChanged"] = True
+      if jsonCorrect:
+        # Input is in JSON format and contains the required fields.
+        try:
+          localLayer = int(jsonDict["layer"])
+        except ValueError:
+          # Layer element cannot be parsed to an int
+          localLayer = None
+        else:
+          # Check if the layer written in the file matches the expected layer.
+          if localLayer != l:
+            if not layerMismatched[l]:
+              print(f"Layer Mismatch: Expected: {l} Actual: {localLayer}")
+              layerMismatched[l] = True
+          else:
+            layerMismatched[l] = False
 
-         config.layerManager[localLayer]["newAnimation"].set()
+          # Get the type of pattern to run.
+          localSequence = jsonDict["sequence"]
 
-        elif jsonDict["html"] != config.layerManager[localLayer]["args"]:
-            config.layerManager[localLayer]["args"] = jsonDict["html"]
-            config.layerManager[localLayer]["argsChanged"] = True
+          # Perform actions if the layer needs to be changed to a different pattern.
+          if localSequence != config.layerManager[l]["name"]:
 
-            config.layerManager[localLayer]["newAnimation"].set()
-        # else:
-        #   print(f'Continuing sequence: <{LEDSequence}>')
-    else:
-      print(f"Invalid JSON: {jsonStringInput}")
+            config.layerManager[l]["name"] = localSequence
+            config.layerManager[l]["nameChanged"] = True
 
-    time.sleep(1)
-  print("exiting PollLEDSequence thread")
+            config.layerManager[l]["args"] = jsonDict["html"]
+            config.layerManager[l]["argsChanged"] = True
+
+            config.layerManager[l]["newAnimation"].set()
+          # Perform these actions if the properties within the pattern have changed.
+          elif jsonDict["html"] != config.layerManager[l]["args"]:
+            config.layerManager[l]["args"] = jsonDict["html"]
+            config.layerManager[l]["argsChanged"] = True
+
+            config.layerManager[l]["newAnimation"].set()
+          # else: # File has not changed to warrant a change in pattern.
+          #   print(f'Continuing sequence: <{LEDSequence}>')
+          invalidJson[l] = False
+      else: # File is not in JSON format or does not contain the required fields.
+        if not invalidJson[l]:
+          print(f"Invalid JSON [layer{l}]: {jsonStringInput}")
+          invalidJson[l] = True
+
+    # Once all the layers are checked, sleep for a moment to yield to other threads.
+    time.sleep(0.0001)
+  # If we exit out of the while loop we are leaving the thread.
+  print("Exiting PollLEDSequence thread")
 
 def ManageLayer(layer):
   animationComplete = True
   animationLooping = False
   animation = None
   while config.run:
-
+    # If the pattern has changed in some way (new patern or updated arguments) perform nececarry actions.
     if config.layerManager[layer]["nameChanged"]:
       animation = ChangeAnimation(config.layerManager[layer])
       animationLooping = animation.looping
     if config.layerManager[layer]["argsChanged"]:
       UpdateAnimation(animation, config.layerManager[layer])
 
+    # Increment the animation by one frame and sync with the next render time.
     if animation is not None:
       animationComplete = animation.Step()
       animation.FrameSync()
+    # If there are no more frames to animate, sleep this thread until a new animation is set.
     if animationComplete and not animationLooping:
       config.layerManager[layer]["newAnimation"].clear()
       config.layerManager[layer]["newAnimation"].wait()
@@ -106,16 +131,26 @@ def ChangeAnimation(layerConfig):
   newClassName = layerConfig["name"]
   myModule = None
   animationClass = None
+  # Lock to prevent threads from accessing sys.modules before an import for a class is complate.
+  config.modulesLock.acquire()
+  # Check if the class does not already exist in this python instance.
   if "Animations." + newClassName not in sys.modules:
+    # Reset the cache.
     importlib.invalidate_caches()
     try:
+      # Import the new class.
       myModule = importlib.import_module("Animations." + newClassName)
     except ModuleNotFoundError:
+      # If the class does not have an associated "className.py" file, then show an error.
       myModule = Error
       newClassName = "Error"
+    # Get an object of the class name.
     animationClass = getattr(myModule, newClassName)
   else:
+      # Get an object of the class name.
     animationClass = getattr(sys.modules["Animations." + newClassName], newClassName)
+  config.modulesLock.release()
+
   layerConfig["nameChanged"] = False
   return animationClass(layerConfig["layer"], layerConfig["args"])
 
@@ -135,7 +170,7 @@ if __name__ == "__main__":
 
   # Thread to poll Sequence file to begin other threads
   primaryThreads.append(threading.Thread(
-      target=PollLEDSequence, name='THREAD_Poll', args=('../transfer/',), daemon=True))
+      target=PollLEDSequence, name='THREAD_Poll', args=('../ledlayers/',), daemon=True))
   # Thread to render the virtual pixel values to the physical strip
   primaryThreads.append(threading.Thread(
       target=RenderLoop, name='THREAD_Render', args=(), daemon=True))
@@ -144,12 +179,12 @@ if __name__ == "__main__":
     layerThreads.append(threading.Thread(
         target=ManageLayer, name='THREAD_Layer_' + str(l), args=(l,), daemon=True))
 
-  for lt in layerThreads:
-    lt.start()
-
   # starting primary threads
   for t in primaryThreads:
     t.start()
+
+  for lt in layerThreads:
+    lt.start()
 
   # Continue along main thread
   curpath = os.path.abspath(os.curdir)
@@ -176,9 +211,12 @@ if __name__ == "__main__":
   for t in primaryThreads:
     t.join()
 
-  # Clear the current sequence
-  with open("../transfer/LED_Sequence", "w") as f:
-    f.write('')
+  # Clear the current patterns
+  for l in config.LAYER_RANGE:
+    # Set the file name for this layer.
+    filePath = "../ledlayers/" + "layer" + str(l) + ".json"
+    with open(filePath, "w") as f:
+      f.write('')
 
   # All threads completely executed
   print("Goodbye!")
