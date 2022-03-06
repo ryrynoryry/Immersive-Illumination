@@ -16,12 +16,15 @@ let layerElements = document.querySelectorAll(".layer");
 layerElements.forEach(
   function (elem, i, listObj) {
     // Create a handler when the dropdown is clicked, prompting the list to be populated.
-    $(`#layer${i} > .layerArea > select`).mousedown(function () {
+    $(`#layer${i + 1} > .layerArea > select`).mousedown(function () {
       ListSequences(this);
     });
     
     // Populate div with selected pattern.
     elem.querySelector(".layerArea > select").onchange = function () {
+      if (this.value == "None") {
+        this.value = "Clear";
+      }
       Populate(this.value + ".json", i + 1);
     }
   }
@@ -29,24 +32,29 @@ layerElements.forEach(
 
 // Update the proper value for the JSON of this sequence, then write the whole JSON string to the server.
 function WriteSequence(inputObj, sequenceName, layer) {
-  jsonObjs[layer][sequenceName].html.every(element => {
+  jsonObjs[layer - 1][sequenceName].layer = layer - 1
+  jsonObjs[layer - 1][sequenceName].html.every(element => {
     if (element.name == inputObj.id) {
-      element.value = inputObj.value;
+      if (inputObj.value != "") {
+        element.value = inputObj.value;
+      }
+      else {
+        element.value = '0';
+      }
       return false;
     }
     return true;
   });
-
-  UpdateJSONFile(JSON.stringify(jsonObjs[layer][sequenceName]), sequenceName + ".json", layer, CopyJSONFileToLayer);
+  UpdateJSONFile(JSON.stringify(jsonObjs[layer - 1][sequenceName]), sequenceName + ".json", layer - 1, CopyJSONFileToLayer);
 
 }
 
 // Overwrite the contents of the specified file with the given text.
-function UpdateJSONFile(text, name, layer, callback) {
+function UpdateJSONFile(text, name, layer0, callback) {
   $.post("writeValue.php", { value: text, fileName: directoryPath + name, fileMode: "w+"},
     function (result) {
-      console.log('File: ' + name + ' updated to: "' + text + '" Response: ' + result);
-      callback(name, layer - 1)
+      console.log('File: ' + name + ' updated to: ' + text);
+      callback(name, layer0)
   })
   .fail(function(xhr) {
     console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
@@ -80,6 +88,9 @@ function ListSequences(selectObj) {
     for (i = L; i >= 0; i--) {
       selectObj.remove(i);
     }
+
+    // For some reason, the first option doesnt trigger a change event. Add a blank.
+    selectObj.add(document.createElement("option"));
 
     // Create the default option.
     var noneOption = document.createElement("option");
@@ -124,8 +135,7 @@ function openFile(file) {
 
 // Get the contents of the JSON file and display them in their own div.
 function Populate(fileName, layer) {
-  console.log("Populating..");
-  console.log(displayedSequences);
+  var sequenceName = "";
   if (!displayedSequences[layer - 1].includes(fileName)) {
     // Use time object to prevent caching.
     $.getJSON(directoryPath + fileName, { _: new Date().getTime() }, function (result) {
@@ -134,7 +144,8 @@ function Populate(fileName, layer) {
                     layerElements[layer - 1].querySelector(".layerArea > .layerPatterns > div > button"),
                     layer - 1, false);
 
-      jsonObjs[layer][result.sequence] = result;
+      jsonObjs[layer - 1][result.sequence] = result;
+      sequenceName = result.sequence;
       // Create outer container for this sequence.
       $(`#layer${layer} > .layerArea > .layerPatterns`).append(`<div class="${result.sequence} w3-margin-bottom " style="border: grey; border-style: solid; background-color: lightblue;"></div>`);
       // Create inner buttons.
@@ -152,14 +163,15 @@ function Populate(fileName, layer) {
       })
     })
     .done(function () {
-      displayedSequences[layer - 1].push(fileName)
+      displayedSequences[layer - 1].push(fileName);
+      WriteSequence(layerElements[layer - 1].querySelector(".layerArea > .layerPatterns > div > button"),
+                    sequenceName, layer);
     })
   }
 }
 
 // Handles the closing of the sequence element.
 function CloseSequence(fileName, obj, layer0, doClear) {
-  console.log(obj);
   let thisIndex = displayedSequences[layer0].indexOf(fileName);
   if (thisIndex != -1) {
     // Remove from the array.
@@ -173,7 +185,7 @@ function CloseSequence(fileName, obj, layer0, doClear) {
     // Remove the outer container from the HTML.
     obj.parentElement.remove();
   }
-  else {
+  else if (displayedSequences[layer0].length > 0) {
     console.log(fileName + " is not displayed.")
   }
 }
