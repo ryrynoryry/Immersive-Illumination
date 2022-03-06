@@ -6,7 +6,7 @@ class Lightning(BaseAnimation):
       super().__init__(layer)
       self.name = "Lightning"
       self.looping = False
-      self.illuminationArea = [args[0]["value"], args[1]["value"]] # [StartPos, EndPos]
+      self.illuminationArea = [int(args[0]["value"]), min(int(args[1]["value"]), self.NUM_PIXELS - 1)]  # [StartPos, EndPos]
       self.BRIGHTNESS = 1.0
       self.lightningOver = False
       self.originalLightningColor = (255, 255, 255)
@@ -38,7 +38,7 @@ class Lightning(BaseAnimation):
         self.subStrikes -= 1
       elif self.subStrikes == 0:
         if random.randint(0, 4) == 0:
-          self.Strike([int((c * 1.25) + 0.5) for c in self.currentColor]) # Strike one last time, 0.25 times brighter
+          self.Strike([min(int((c * 1.25) + 0.5), 255) for c in self.currentColor]) # Strike one last time, 0.25 times brighter
 
       # If the strikes have completelf faded, clear the strip and end the animation.
       if self.currentColor == [0, 0, 0]:
@@ -56,7 +56,7 @@ class Lightning(BaseAnimation):
     for i in range(self.illuminationArea[0], self.illuminationArea[1]):
       self.strip[i] = None
     self.ReleaseLock()
-    self.illuminationArea = args[0]["value"] # [StartPos, EndPos]
+    self.illuminationArea = [int(args[0]["value"]), int(args[1]["value"])]  # [StartPos, EndPos]
     self.subStrikes = random.randint(0, self.MAX_SUBSTRIKES)
     self.buildingStrikes = random.randint(0, 4)
     self.stepCount = 0

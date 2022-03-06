@@ -28,5 +28,7 @@ class RunningLights(BaseAnimation):
 
   def Setup(self, args):
     self.color = self.ToRGB(args[0]["value"])
-    self.freq = args[1]["value"]
-    self.reverse = args[2]["value"]
+    self.freq = int(args[1]["value"])
+    if self.freq == 0:
+      self.freq = 1
+    self.reverse = args[2]["value"] == ''

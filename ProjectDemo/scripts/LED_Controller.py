@@ -34,6 +34,7 @@ def InitializePixels(pixelBrightness = 1.0):
     config.LEDstrip = neopixel.NeoPixel(
         HARDWARE_PIN, config.NUM_PIXELS, brightness=pixelBrightness, auto_write=False, pixel_order=ORDER
     )
+    print("Physical LEDs initialized")
   else:
     # TKINTER
     global root
@@ -67,19 +68,14 @@ def InitializePixels(pixelBrightness = 1.0):
     canvas.pack()
 
     config.LEDstrip = [(0,0,0)] * config.NUM_PIXELS
-
-  for i in range(config.NUM_PIXELS):
-    config.LEDstrip[i] = (25, 25, 25)
-    UpdateStrip(config.LEDstrip)
-
-  time.sleep(0.5)
+    print("Simulated LEDs initialized")
 
   FillStrip(config.LEDstrip, (0, 0, 0))
   UpdateStrip(config.LEDstrip)
   time.sleep(0.2)
 
 # Red
-  FillStrip(config.LEDstrip, (25, 0, 0))
+  FillStrip(config.LEDstrip, (255, 0, 0))
   UpdateStrip(config.LEDstrip)
   time.sleep(0.3)
 
@@ -87,7 +83,7 @@ def InitializePixels(pixelBrightness = 1.0):
   UpdateStrip(config.LEDstrip)
   time.sleep(0.2)
 # Green
-  FillStrip(config.LEDstrip, (0, 25, 0))
+  FillStrip(config.LEDstrip, (0, 255, 0))
   UpdateStrip(config.LEDstrip)
   time.sleep(0.3)
 
@@ -95,7 +91,7 @@ def InitializePixels(pixelBrightness = 1.0):
   UpdateStrip(config.LEDstrip)
   time.sleep(0.2)
 # Blue
-  FillStrip(config.LEDstrip, (0, 0, 25))
+  FillStrip(config.LEDstrip, (0, 0, 255))
   UpdateStrip(config.LEDstrip)
   time.sleep(0.3)
 
@@ -103,7 +99,7 @@ def InitializePixels(pixelBrightness = 1.0):
   UpdateStrip(config.LEDstrip)
   time.sleep(0.2)
 # White
-  FillStrip(config.LEDstrip, (50, 50, 50))
+  FillStrip(config.LEDstrip, (255, 255, 255))
   UpdateStrip(config.LEDstrip)
   time.sleep(1.0)
 
@@ -119,7 +115,7 @@ def RenderPixels(localStripLayers):
       localStripLayers[i] = config.stripLayers[i].copy()
       config.stripLayersLocks[i].release()
     else:
-      print(f'Layer {i} busy')
+      print(f'Layer {i} busy. ({config.layerManager[i]["name"]})')
 
   # Copy pixel layers from top to bottom to the strip
   for i in range(config.NUM_PIXELS):
@@ -138,7 +134,7 @@ def RenderLoop():
   # Create empty pixel layers.
   localLayers = [[None] * config.NUM_PIXELS for i in config.LAYER_RANGE]
 
-  InitializePixels(1.0)
+  InitializePixels(0.2)
 
   frameCount = 0
   # secondStart = time.time()

@@ -115,15 +115,17 @@ def ManageLayer(layer):
     if config.layerManager[layer]["nameChanged"]:
       animation = ChangeAnimation(config.layerManager[layer])
       animationLooping = animation.looping
+      print(f"[{layer}] Changing Animation to: {config.layerManager[layer]['name']}")
     if config.layerManager[layer]["argsChanged"]:
       UpdateAnimation(animation, config.layerManager[layer])
-
+      print(f"[{layer}] Updating Animation: {config.layerManager[layer]['name']}")
     # Increment the animation by one frame and sync with the next render time.
     if animation is not None:
       animationComplete = animation.Step()
       animation.FrameSync()
     # If there are no more frames to animate, sleep this thread until a new animation is set.
     if animationComplete and not animationLooping:
+      print(f"[{layer}] Animation complete: {config.layerManager[layer]['name']}")
       config.layerManager[layer]["newAnimation"].clear()
       config.layerManager[layer]["newAnimation"].wait()
 

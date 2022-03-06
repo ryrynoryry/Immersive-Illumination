@@ -49,6 +49,7 @@ class LavaLamp(BaseAnimation):
       for x in range(self.size):
         # Execute noise function to add each pixel to a 1D list.
         noise.append(fBmNoise(x*freq, y*freq, int(self.size*freq), octs))
+      print(f"Working on row: {y}")
 
     # Normalize to [0,1] while converting to a 2D list of "size x size"
     myMax = max(noise)

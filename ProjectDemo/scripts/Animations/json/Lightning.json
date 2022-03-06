@@ -6,12 +6,12 @@
     {
       "name": "IlluminationAreaStart",
       "element": "number",
-      "value": 3
+      "value": 50
     },
     {
       "name": "IlluminationAreaEnd",
       "element": "number",
-      "value": 8
+      "value": 150
     }
   ]
 }
