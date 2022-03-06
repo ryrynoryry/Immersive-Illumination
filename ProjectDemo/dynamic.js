@@ -1,24 +1,35 @@
-// global variable
-var data;
+// global variables
 let sequenceFilenames = Array();
-let sequenceObjects = {}
-let displayedSequences = Array();
-const directoryPath = "scripts/Animations/json/";
-
-// Create a handler for when an option is selected from the dropdown.
-document.getElementById("selectSequence").onchange = function () {
-  populate(this.value + ".json");
+let jsonObjs = Array(5);
+for (var i = 0; i < jsonObjs.length; i++) {
+  jsonObjs[i] = {}
+}
+let displayedSequences = Array(5);
+for (var i = 0; i < displayedSequences.length; i++) {
+  displayedSequences[i] = Array();
 }
 
-// Create a handler when the dropdown is clicked, prompting the list to be populated.
-$('#selectSequence').mousedown(function () {
-  listSequences();
-});
+const directoryPath = "scripts/Animations/json/";
 
+let layerElements = document.querySelectorAll(".layer");
+
+layerElements.forEach(
+  function (elem, i, listObj) {
+    // Create a handler when the dropdown is clicked, prompting the list to be populated.
+    $(`#layer${i} > .layerArea > select`).mousedown(function () {
+      ListSequences(this);
+    });
+    
+    // Populate div with selected pattern.
+    elem.querySelector(".layerArea > select").onchange = function () {
+      Populate(this.value + ".json", i + 1);
+    }
+  }
+);
 
 // Update the proper value for the JSON of this sequence, then write the whole JSON string to the server.
-function writeSequence(inputObj, sequenceName) {
-  sequenceObjects[sequenceName].html.every(element => {
+function WriteSequence(inputObj, sequenceName, layer) {
+  jsonObjs[layer][sequenceName].html.every(element => {
     if (element.name == inputObj.id) {
       element.value = inputObj.value;
       return false;
@@ -26,38 +37,65 @@ function writeSequence(inputObj, sequenceName) {
     return true;
   });
 
-  UpdateJSONFile(JSON.stringify(sequenceObjects[sequenceName]), directoryPath + sequenceName + ".json");
+  UpdateJSONFile(JSON.stringify(jsonObjs[layer][sequenceName]), sequenceName + ".json", layer, CopyJSONFileToLayer);
+
 }
 
 // Overwrite the contents of the specified file with the given text.
-function UpdateJSONFile(text, name) {
-  $.post("writeValue.php", { value: text, fileName: name, fileMode: "w+"},
+function UpdateJSONFile(text, name, layer, callback) {
+  $.post("writeValue.php", { value: text, fileName: directoryPath + name, fileMode: "w+"},
     function (result) {
-      // console.log('File: ' + name + ' updated to: "' + text + '" Response: ' + result);
+      console.log('File: ' + name + ' updated to: "' + text + '" Response: ' + result);
+      callback(name, layer - 1)
   })
   .fail(function(xhr) {
     console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
   })
 };
 
-function listSequences() {
+function CopyJSONFileToLayer(name, layer0) {
+  $.post("copyFile.php", { originalName: name, source: directoryPath, destination: "ledlayers/", newName: "layer" + layer0 + ".json" },
+    function (result) {
+      console.log(result);
+    }
+  )
+  .fail(function (xhr) {
+    console.log("Error: '" + "copyFile.php" + "': " + xhr.status + " " + xhr.statusText);
+  })
+}
+
+function ListSequences(selectObj) {
   $.get(directoryPath, { _: new Date().getTime() }, function (result) {
-    // console.log(result + "\nRESULT END");
     sequenceFilenames = []
+    // Get each filename in the directory.
     $(result).find("td > a").each(function () {
       if (openFile($(this).attr("href"))) {
         sequenceFilenames.push($(this).attr("href"));
         }
       });
-      console.log(sequenceFilenames);
   })
   .done(function () {
-    $('#selectSequence').empty();
-    $('#selectSequence').append($("<option>No sequence</option>"));
+    // Request successful. Reset the list options.
+    var i, L = selectObj.options.length - 1;
+    for (i = L; i >= 0; i--) {
+      selectObj.remove(i);
+    }
+
+    // Create the default option.
+    var noneOption = document.createElement("option");
+    noneOption.value = "None";
+    noneOption.text = "None";
+    selectObj.add(noneOption);
+
+    // Create the other options.
     let name = "";
     $.each(sequenceFilenames, function (i, p) {
+      // Remove ".json" from the name
       name = p.substr(0, p.length - 5);
-      $('#selectSequence').append($('<option></option>').val(name).html(name));
+      var opt = document.createElement("option");
+      opt.value = name;
+      opt.text = name;
+      selectObj.add(opt);
     });
   })
 }
@@ -84,64 +122,79 @@ function openFile(file) {
   }
 };
 
-// Create div's for all sequences in the list.
-function populateAll() {
-  listSequences();
-  sequenceFilenames.forEach(fileName => {
-    populate(fileName);
-  });
-}
-
 // Get the contents of the JSON file and display them in their own div.
-function populate(fileName) {
-  if (!displayedSequences.includes(fileName)) {
+function Populate(fileName, layer) {
+  console.log("Populating..");
+  console.log(displayedSequences);
+  if (!displayedSequences[layer - 1].includes(fileName)) {
     // Use time object to prevent caching.
     $.getJSON(directoryPath + fileName, { _: new Date().getTime() }, function (result) {
-      sequenceObjects[result.sequence] = result;
-      console.log(result);
+
+      CloseSequence(displayedSequences[layer - 1][0],
+                    layerElements[layer - 1].querySelector(".layerArea > .layerPatterns > div > button"),
+                    layer - 1, false);
+
+      jsonObjs[layer][result.sequence] = result;
       // Create outer container for this sequence.
-      $("#sequenceArea").append(`<div id=${result.sequence} class="w3-margin-bottom " style="border: grey; border-style: solid; background-color: lightblue;"></div>`);
+      $(`#layer${layer} > .layerArea > .layerPatterns`).append(`<div class="${result.sequence} w3-margin-bottom " style="border: grey; border-style: solid; background-color: lightblue;"></div>`);
       // Create inner buttons.
-      $(`#${result.sequence}`).append(`<button class="fa fa-lg fa-close w3-button w3-right w3-padding-small" onclick="CloseSequence('${fileName}', this)"></button>`); // Close
-      $(`#${result.sequence}`).append(`<button class="fa fa-lg fa-eye w3-button w3-right w3-padding-small"></button>`); // Hide
+      $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<button class="fa fa-lg fa-close w3-button w3-right w3-padding-small" onclick="CloseSequence('${fileName}', this, ${layer - 1}, true)"></button>`); // Close
+      // $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<button class="fa fa-lg fa-eye w3-button w3-right w3-padding-small"></button>`); // Hide
       // Create layer button.
-      $(`#${result.sequence}`).append(`<div class="w3-left w3-padding-small w3-button" onclick="">
+      $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<div class="w3-left w3-padding-small w3-button" onclick="">
                                         <div class="fa fa-clone w3-padding-small" style="transform: rotate(-135deg); position: absolute;"></div>
-                                        <label class="w3-margin-left w3-padding-small">1</label>
+                                        <label class="w3-margin-left w3-padding-small">${layer}</label>
                                        </div>`);
-      $(`#${result.sequence}`).append(`<h3>${result.displayName}</h3>`);
+      $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<h3>${result.displayName}</h3>`);
       $.each(result.html, function (i, item) {
-        $(`#${result.sequence}`).append(`<label for=${item.name}>${item.name}</label> `);
-        $(`#${result.sequence}`).append(`<input type=${item.element} id=${item.name} value=${item.value} oninput="writeSequence(this, '${result.sequence}')">`);
+        $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<label for=${item.name}>${item.name}</label> `);
+        $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<input type=${item.element} id=${item.name} value=${item.value} oninput="WriteSequence(this, '${result.sequence}', ${layer})">`);
       })
     })
     .done(function () {
-      displayedSequences.push(fileName)
+      displayedSequences[layer - 1].push(fileName)
     })
   }
 }
 
 // Handles the closing of the sequence element.
-function CloseSequence(fileName, obj) {
-  let thisIndex = displayedSequences.indexOf(fileName);
+function CloseSequence(fileName, obj, layer0, doClear) {
+  console.log(obj);
+  let thisIndex = displayedSequences[layer0].indexOf(fileName);
   if (thisIndex != -1) {
     // Remove from the array.
-    displayedSequences.splice(thisIndex, 1);
+    displayedSequences[layer0].splice(thisIndex, 1);
     // Remove the property from the container object.
-    delete sequenceObjects[obj.parentElement.id];
+    delete jsonObjs[layer0][obj.parentElement.id];
     // Send "Clear"
-    //TODO: Send to the current layer.
-    $.post("copyFile.php", { originalName: "Clear.json", source: "scripts/Animations/json/", destination: "transfer/", newName: "LED_Sequence" },
-      function (result) {
-        console.log(result);
-      })
-      .fail(function (xhr) {
-        console.log("Error: '" + "copyFile.php" + "': " + xhr.status + " " + xhr.statusText);
-      })
+    if (doClear) {
+      CopyJSONFileToLayer("Clear.json", layer0);
+    }
     // Remove the outer container from the HTML.
     obj.parentElement.remove();
   }
   else {
     console.log(fileName + " is not displayed.")
+  }
+}
+
+document.querySelectorAll(".layerCollapse").forEach(btn => {
+  btn.onclick = function() {
+    ToggleLayerArea(this);
+  }
+});
+
+function ToggleLayerArea(obj) {
+  if (obj.lastChild.classList.contains("fa-angle-down")) {
+    // Show area.
+    obj.closest(".layer").querySelector(".layerArea").hidden = false;
+    obj.lastChild.classList.remove("fa-angle-down");
+    obj.lastChild.classList.add("fa-angle-up");
+  }
+  else {
+    // Hide area.
+    obj.closest(".layer").querySelector(".layerArea").hidden = true;
+    obj.lastChild.classList.remove("fa-angle-up");
+    obj.lastChild.classList.add("fa-angle-down");
   }
 }

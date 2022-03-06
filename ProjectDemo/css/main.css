@@ -43,8 +43,51 @@ h1 {
   /*Bright Fuchsia: #FC466B*/
 }
 
-#lights > h2, #lights > label {
+#lights > h2, #lights > h3, #lights > label {
   color: lightblue;
+}
+
+.layerHeader {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 3ch;
+  padding: 3ch 0ch 3ch;
+  margin: 0 auto;
+  color: lightblue;
+  background: linear-gradient(#02002400 0%, #0200247F 20%, #020024BF 30%, #020024BF 70%, #0200247F 80%, #02002400 100%);
+  pointer-events: none;
+}
+
+.layerCollapse {
+  position: absolute;
+  left: 1ch;
+  color: lightblue;
+  /* background-color: #0000003f; */
+  background-color: transparent;
+  /* border-radius: 35%; */
+  border-style: none;
+  pointer-events: auto; 
+}
+.layerRefresh {
+  color: lightblue;
+  /* background-color: #0000003f; */
+  background-color: transparent;
+  border-radius: 25%;
+  border-style: none;
+}
+
+.layerArea {
+  padding-bottom: 1vh;
+  border-bottom: 3px solid #0200247F;
+  border-bottom-style: dotted ;
+}
+
+.layerArea > select {
+  margin-bottom: 1ch;
+}
+
+i.fa-angle-down, i.fa-angle-up {
+  font-size: 2em;
 }
 
 input[type=tel]:invalid {

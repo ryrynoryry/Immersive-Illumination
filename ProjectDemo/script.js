@@ -679,7 +679,7 @@ function FlashThunder() {
   //   }, time * 100 + 50);
   // }
   // Copy lightning json file for Python to catch and display.
-  $.post("copyFile.php", { originalName: "Lightning.json", source: "scripts/Animations/json/", destination: "transfer/", newName: "LED_Sequence"},
+  $.post("copyFile.php", { originalName: "Lightning.json", source: "scripts/Animations/json/", destination: "ledlayers/", newName: "layerX.json"},
     function (result) {
       console.log(result);
   })
