@@ -162,9 +162,16 @@ def UpdateAnimation(animation, layerConfig):
 
 if __name__ == "__main__":
 
-  # with open("../transfer/LED_Sequence", "w") as f:
-  #   jsonString = '{"sequence": "Rain", "layer": "2"}'
-  #   f.write(jsonString)
+  # Clear current patterns.
+  # Get the json for the Clear pattern.
+  clearJSON = ""
+  with open("Animations/json/Clear.json", "r") as clearFile:
+    clearJSON = json.loads(clearFile.read())
+  # Copy Clear to each of the layers.
+  for l in config.LAYER_RANGE:
+    with open("../ledlayers/layer" + str(l) + ".json", "w") as layerFile:
+      clearJSON["layer"] = str(l)
+      layerFile.write(json.dumps(clearJSON, indent=2))
 
   # creating threads
   primaryThreads = []
@@ -213,12 +220,11 @@ if __name__ == "__main__":
   for t in primaryThreads:
     t.join()
 
-  # Clear the current patterns
+  # Clear the current patterns before a clean exit.
   for l in config.LAYER_RANGE:
-    # Set the file name for this layer.
-    filePath = "../ledlayers/" + "layer" + str(l) + ".json"
-    with open(filePath, "w") as f:
-      f.write('')
+    with open("../ledlayers/layer" + str(l) + ".json", "w") as layerFile:
+      clearJSON["layer"] = str(l)
+      layerFile.write(json.dumps(clearJSON, indent=2))
 
   # All threads completely executed
   print("Goodbye!")
