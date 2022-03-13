@@ -1,12 +1,8 @@
 // global variables
-let sequenceFilenames = Array();
+let patternFilenames = Array();
 let jsonObjs = Array(5);
 for (var i = 0; i < jsonObjs.length; i++) {
   jsonObjs[i] = {}
-}
-let displayedSequences = Array(5);
-for (var i = 0; i < displayedSequences.length; i++) {
-  displayedSequences[i] = Array();
 }
 
 const directoryPath = "scripts/Animations/json/";
@@ -16,24 +12,39 @@ let layerElements = document.querySelectorAll(".layer");
 layerElements.forEach(
   function (elem, i, listObj) {
     // Create a handler when the dropdown is clicked, prompting the list to be populated.
-    $(`#layer${i + 1} > .layerArea > select`).mousedown(function () {
-      ListSequences(this);
-    });
-    
-    // Populate div with selected pattern.
-    elem.querySelector(".layerArea > select").onchange = function () {
-      if (this.value == "None") {
-        this.value = "Clear";
+
+    // Whenever the layer is opened, populate the list and display the active pattern.
+    elem.querySelector(".layerCollapse").onclick = function () {
+      isOpened = ToggleLayerArea(this);
+      if (isOpened) {
+        ListPatterns(elem.querySelector(".layerArea > select"));
+        Populate("ledlayers/layer" + i + ".json", i + 1, false);
       }
-      Populate(this.value + ".json", i + 1);
+    }
+
+    // Populate div with selected pattern, clearing what was previously there.
+    elem.querySelector(".layerArea > select").onchange = function () {
+      let filename = this.value;
+      // If "None" is selected, send Clear since None is not a pattern.
+      if (this.value == "None") {
+        filename = "Clear"
+      }
+
+      Populate(directoryPath + filename + ".json", i + 1, true);
+    }
+
+    // Refresh the list and repopulate the div with the active pattern.
+    elem.querySelector(".layerArea > .layerRefresh").onclick = function () {
+      ListPatterns(elem.querySelector(".layerArea > select"));
+      Populate("ledlayers/layer" + i + ".json", i + 1, false);
     }
   }
 );
 
-// Update the proper value for the JSON of this sequence, then write the whole JSON string to the server.
-function WriteSequence(inputObj, sequenceName, layer) {
-  jsonObjs[layer - 1][sequenceName].layer = layer - 1
-  jsonObjs[layer - 1][sequenceName].html.every(element => {
+// Update the proper value for the JSON of this pattern, then write the whole JSON string to the server.
+function WritePattern(inputObj, patternName, layer) {
+  jsonObjs[layer - 1].layer = layer - 1
+  jsonObjs[layer - 1].html.every(element => {
     if (element.name == inputObj.id) {
       if (inputObj.value != "") {
         element.value = inputObj.value;
@@ -45,8 +56,7 @@ function WriteSequence(inputObj, sequenceName, layer) {
     }
     return true;
   });
-  UpdateJSONFile(JSON.stringify(jsonObjs[layer - 1][sequenceName]), sequenceName + ".json", layer - 1, CopyJSONFileToLayer);
-
+  UpdateJSONFile(JSON.stringify(jsonObjs[layer - 1]), patternName + ".json", layer - 1, CopyJSONFileToLayer);
 }
 
 // Overwrite the contents of the specified file with the given text.
@@ -72,13 +82,13 @@ function CopyJSONFileToLayer(name, layer0) {
   })
 }
 
-function ListSequences(selectObj) {
+function ListPatterns(selectObj) {
   $.get(directoryPath, { _: new Date().getTime() }, function (result) {
-    sequenceFilenames = []
+    patternFilenames = []
     // Get each filename in the directory.
     $(result).find("td > a").each(function () {
       if (openFile($(this).attr("href"))) {
-        sequenceFilenames.push($(this).attr("href"));
+        patternFilenames.push($(this).attr("href"));
         }
       });
   })
@@ -89,9 +99,6 @@ function ListSequences(selectObj) {
       selectObj.remove(i);
     }
 
-    // For some reason, the first option doesnt trigger a change event. Add a blank.
-    selectObj.add(document.createElement("option"));
-
     // Create the default option.
     var noneOption = document.createElement("option");
     noneOption.value = "None";
@@ -100,7 +107,7 @@ function ListSequences(selectObj) {
 
     // Create the other options.
     let name = "";
-    $.each(sequenceFilenames, function (i, p) {
+    $.each(patternFilenames, function (i, p) {
       // Remove ".json" from the name
       name = p.substr(0, p.length - 5);
       var opt = document.createElement("option");
@@ -134,67 +141,76 @@ function openFile(file) {
 };
 
 // Get the contents of the JSON file and display them in their own div.
-function Populate(fileName, layer) {
-  var sequenceName = "";
-  if (!displayedSequences[layer - 1].includes(fileName)) {
-    // Use time object to prevent caching.
-    $.getJSON(directoryPath + fileName, { _: new Date().getTime() }, function (result) {
+function Populate(fileName, layer, doUpdate) {
+  var patternName = "";
+  // Use time object to prevent caching.
+  $.getJSON(fileName, { _: new Date().getTime() }, function (result) {
 
-      CloseSequence(displayedSequences[layer - 1][0],
-                    layerElements[layer - 1].querySelector(".layerArea > .layerPatterns > div > button"),
-                    layer - 1, false);
+    // Remove the current div.
+    ClosePattern(layerElements[layer - 1].querySelector(".layerArea > .layerPatterns > div > button"),
+                  layer - 1, false);
 
-      jsonObjs[layer - 1][result.sequence] = result;
-      sequenceName = result.sequence;
-      // Create outer container for this sequence.
-      $(`#layer${layer} > .layerArea > .layerPatterns`).append(`<div class="${result.sequence} w3-margin-bottom " style="border: grey; border-style: solid; background-color: lightblue;"></div>`);
+    // Update the current patterns.
+    patternName = result.sequence;
+    jsonObjs[layer - 1] = result;
+
+    if (patternName != "Clear") {
+      // Create outer container for this pattern.
+      $(`#layer${layer} > .layerArea > .layerPatterns`).append(`<div class="${patternName} w3-margin-bottom " style="border: grey; border-style: solid; background-color: lightblue;"></div>`);
       // Create inner buttons.
-      $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<button class="fa fa-lg fa-close w3-button w3-right w3-padding-small" onclick="CloseSequence('${fileName}', this, ${layer - 1}, true)"></button>`); // Close
-      // $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<button class="fa fa-lg fa-eye w3-button w3-right w3-padding-small"></button>`); // Hide
+      $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<button class="fa fa-lg fa-close w3-button w3-right w3-padding-small" onclick="CheckAndClose('${patternName}', this, ${layer - 1}, true)"></button>`); // Close
+      // $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<button class="fa fa-lg fa-eye w3-button w3-right w3-padding-small"></button>`); // Hide
       // Create layer button.
-      $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<div class="w3-left w3-padding-small w3-button" onclick="">
-                                        <div class="fa fa-clone w3-padding-small" style="transform: rotate(-135deg); position: absolute;"></div>
-                                        <label class="w3-margin-left w3-padding-small">${layer}</label>
-                                       </div>`);
-      $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<h3>${result.displayName}</h3>`);
+      $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<div class="w3-left w3-padding-small">
+                                                                                    <div class="fa fa-clone w3-padding-small" style="transform: rotate(-135deg); position: absolute;"></div>
+                                                                                    <label class="w3-margin-left w3-padding-small">${layer}</label>
+                                                                                  </div>`);
+      $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<h3>${result.displayName}</h3>`);
       $.each(result.html, function (i, item) {
-        $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<label for=${item.name}>${item.name}</label> `);
-        $(`#layer${layer} > .layerArea > .layerPatterns > .${result.sequence}`).append(`<input type=${item.element} id=${item.name} value=${item.value} oninput="WriteSequence(this, '${result.sequence}', ${layer})">`);
+        $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<label for=${item.name}>${item.name}</label> `);
+        $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<input type=${item.element} id=${item.name} value=${item.value} oninput="WritePattern(this, '${patternName}', ${layer})">`);
       })
-    })
-    .done(function () {
-      displayedSequences[layer - 1].push(fileName);
-      WriteSequence(layerElements[layer - 1].querySelector(".layerArea > .layerPatterns > div > button"),
-                    sequenceName, layer);
-    })
-  }
+    }
+  })
+  .done(function () {
+    if (doUpdate) {
+      WritePattern(layerElements[layer - 1].querySelector(".layerArea > .layerPatterns > div > button"),
+        patternName, layer);
+    }
+  })
 }
 
-// Handles the closing of the sequence element.
-function CloseSequence(fileName, obj, layer0, doClear) {
-  let thisIndex = displayedSequences[layer0].indexOf(fileName);
-  if (thisIndex != -1) {
-    // Remove from the array.
-    displayedSequences[layer0].splice(thisIndex, 1);
-    // Remove the property from the container object.
-    delete jsonObjs[layer0][obj.parentElement.id];
-    // Send "Clear"
-    if (doClear) {
-      CopyJSONFileToLayer("Clear.json", layer0);
+// Compares the current pattern against what is used on the server before closing the element (or refreshing if outdated).
+function CheckAndClose(patternName, obj, layer0, doClear) {
+  let activePattern = "";
+  $.getJSON("ledlayers/layer" + layer0 + ".json", { _: new Date().getTime() }, function (result) {
+    activePattern = result.sequence;
+    // Close/Clear only if the server's pattern matches the pattern in the HTML.
+    if (patternName == activePattern) {
+      ClosePattern(obj, layer0, doClear);
     }
+    else {
+      if (doClear) {
+        Populate("ledlayers/layer" + layer0 + ".json", layer0 + 1, false);
+      }
+    }
+  });
+}
+
+// Handles the closing of the pattern element.
+function ClosePattern(obj, layer0, doClear) {
+  // Remove the property from the container object.
+  delete jsonObjs[layer0];
+  // Send "Clear"
+  if (doClear) {
+    CopyJSONFileToLayer("Clear.json", layer0);
+    layerElements[layer0].querySelector(".layerArea > select").value = "None";
+  }
+  if (obj != null) {
     // Remove the outer container from the HTML.
     obj.parentElement.remove();
   }
-  else if (displayedSequences[layer0].length > 0) {
-    console.log(fileName + " is not displayed.")
-  }
 }
-
-document.querySelectorAll(".layerCollapse").forEach(btn => {
-  btn.onclick = function() {
-    ToggleLayerArea(this);
-  }
-});
 
 function ToggleLayerArea(obj) {
   if (obj.lastChild.classList.contains("fa-angle-down")) {
@@ -202,11 +218,13 @@ function ToggleLayerArea(obj) {
     obj.closest(".layer").querySelector(".layerArea").hidden = false;
     obj.lastChild.classList.remove("fa-angle-down");
     obj.lastChild.classList.add("fa-angle-up");
+    return true
   }
   else {
     // Hide area.
     obj.closest(".layer").querySelector(".layerArea").hidden = true;
     obj.lastChild.classList.remove("fa-angle-up");
     obj.lastChild.classList.add("fa-angle-down");
+    return false
   }
 }
