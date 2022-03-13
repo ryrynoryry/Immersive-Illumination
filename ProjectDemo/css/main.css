@@ -93,3 +93,15 @@ i.fa-angle-down, i.fa-angle-up {
 input[type=tel]:invalid {
   background-color: pink;
 }
+
+.clearAll {
+  display: inline-block;
+  padding: 1ch 2ch 1ch 2ch;
+  margin-top: 2ch;
+  color: rgb(135, 165, 175);
+  background: linear-gradient(#02002400 0%, #02002440 20%, #0200247F 40%, #0200247F 60%, #02002440 80%, #02002400 100%);
+  border-radius: 45%;
+  border-color: rgba(112, 128, 144, 0.5);
+  border-style: solid;
+  border-width: thin;
+}

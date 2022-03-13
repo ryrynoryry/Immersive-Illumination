@@ -41,6 +41,13 @@ layerElements.forEach(
   }
 );
 
+document.querySelector("#lights > .clearAll").onclick = function () {
+  for (let l = 0; l < 5; l++) {
+    ClosePattern(layerElements[l].querySelector(".layerArea > .layerPatterns > div > button"),
+      l, true);
+  }
+}
+
 // Update the proper value for the JSON of this pattern, then write the whole JSON string to the server.
 function WritePattern(inputObj, patternName, layer) {
   jsonObjs[layer - 1].layer = layer - 1
