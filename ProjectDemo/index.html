@@ -70,8 +70,25 @@
              <i class="fa fa-5x fa-play-circle" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
         <button class="w3-hide" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
              <i class="fa fa-5x fa-spinner fa-pulse" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
-        <button id="controllerButton" class="" style="color: black; background-color: transparent; border-radius: 50%; border-width: 0px;">
-             <i class="fa fa-5x fa-play-circle-o" style="font-size: 75vw; background: radial-gradient(circle, #00c267e0 0%, #0022b8 35%, #0700b8 40%, #00c267e0 55%, #0700b8 70%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i></button>
+
+        <button id="controllerButton" class="" style="background-color: transparent; border-radius: 50%; border-width: 0px;">
+          <i class="fa fa-5x fa-play-circle-o"></i>
+        </button>
+      </div>
+
+      <div class="lightsContainer">
+        <button class="lightsButton"><i class="fa fa-lightbulb-o"></i></button>
+        <div class="popoutContainer" hidden>
+          <div class="popoutContents">
+            <br>
+            <label>Brightness</label>
+            <input type="range" min="-0" max="100" value="50">
+            
+            <label>Speed</label>
+            <input type="range" min="-0" max="100" value="50">
+          </div>
+          <div class="darkenedBackground"></div>
+        </div>
       </div>
 
       <div id="rainAdvanced" class="debug" hidden>

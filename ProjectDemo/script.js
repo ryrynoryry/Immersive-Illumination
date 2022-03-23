@@ -190,6 +190,7 @@ function PlayRainSound(obj) {
     ScheduleSound(obj, 1, obj.sounds[0].duration - 1.75, 2);
     // ScheduleSound(obj, 0, obj.buffers[0].duration - (obj.buffers[0].duration / 10));
   }
+  // TODO: START RAIN LIGHTS HERE!
 }
 // var currTime = context.currentTime;
 // for (var i = 0; i < iterations; i++) {
@@ -803,4 +804,21 @@ document.querySelector("#signoff").onclick = function() {
     }
   }
 
+}
+
+document.querySelector(".darkenedBackground").onclick = function () {
+  this.parentElement.hidden = true;
+}
+
+let rainLightsEnabled = false;
+document.querySelector(".lightsButton").onclick = function () {
+  rainLightsEnabled = !rainLightsEnabled;
+  if (rainLightsEnabled) {
+    this.firstChild.style.color = "#C0C090";
+    // Enable rain
+  }
+  else {
+    this.firstChild.style.color = "lightblue";
+  }
+  this.nextElementSibling.hidden = false;
 }
