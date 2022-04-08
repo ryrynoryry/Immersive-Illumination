@@ -87,15 +87,17 @@ function UpdateContextDisplay(contextDisplay) {
 // Function to be called after all files were successfully loaded.
 function AllBuffersLoaded(listofBuffers, obj) {
   if (obj === RainObj) {
-    controllerBtn.lastChild.classList.remove("fa-spinner");
-    controllerBtn.lastChild.classList.remove("fa-pulse");
-    controllerBtn.lastChild.classList.add("fa-play-circle-o");
+    controllerBtn.lastElementChild.classList.remove("fa-spinner");
+    controllerBtn.lastElementChild.classList.remove("fa-pulse");
+    controllerBtn.lastElementChild.classList.add("fa-play-circle-o");
   }
   else if (obj === ThunderObj) {
-    thunderToggleBtn.lastChild.classList.remove("fa-bolt");
-    thunderToggleBtn.lastChild.classList.remove("fa-spin");
-    thunderToggleBtn.lastChild.classList.add("fa-toggle-on");
+    thunderToggleBtn.lastElementChild.classList.remove("fa-bolt");
+    thunderToggleBtn.lastElementChild.classList.remove("fa-spin");
+    thunderToggleBtn.lastElementChild.classList.add("fa-toggle-on");
     thunderToggleBtn.removeAttribute("disabled");
+
+    document.querySelector("#thunderControls").hidden = false;
     thunderEnabled = true;
   }
 }
@@ -297,9 +299,9 @@ controllerBtn.onclick = function () {
   if (CheckIfContextExists(RainObj) == false) {
     console.log(RainObj.prefix + " Initializing context");
     // Add loading icon.
-    controllerBtn.lastChild.classList.remove("fa-play-circle-o");
-    controllerBtn.lastChild.classList.add("fa-spinner");
-    controllerBtn.lastChild.classList.add("fa-pulse");
+    controllerBtn.lastElementChild.classList.remove("fa-play-circle-o");
+    controllerBtn.lastElementChild.classList.add("fa-spinner");
+    controllerBtn.lastElementChild.classList.add("fa-pulse");
 
     // Update the context display now that the context exists.
     UpdateContextDisplay(rainContextDisplay);
@@ -322,10 +324,13 @@ controllerBtn.onclick = function () {
     if (!RainObj.isPlaying) {
       PlayRainSound(RainObj);
       RainObj.audioCtx.resume().then(function() {
-        this.lastChild.classList.remove("fa-play-circle-o");
-        this.lastChild.classList.add("fa-pause-circle-o");
+        this.lastElementChild.classList.remove("fa-play-circle-o");
+        this.lastElementChild.classList.add("fa-pause-circle-o");
       }.bind(this));
       RainObj.isPlaying = true;
+      if (rainLightsEnabled) {
+        StartRainLights();
+      }
 
       if (CheckIfContextExists(ThunderObj) == true && thunderEnabled) {
         if (!ThunderObj.isPlaying) {
@@ -338,11 +343,13 @@ controllerBtn.onclick = function () {
   
       // !!!!!!!!!!!!!!!!!Find out how to tell if a buffersource has ended!!!!!!!!!!!!!!
       RainObj.audioCtx.suspend().then(function() {
-        this.lastChild.classList.remove("fa-pause-circle-o");
-        this.lastChild.classList.add("fa-play-circle-o");
+        this.lastElementChild.classList.remove("fa-pause-circle-o");
+        this.lastElementChild.classList.add("fa-play-circle-o");
       }.bind(this));
       RainObj.isPlaying = false;
-
+      if (rainLightsEnabled) {
+        StopRainLights();
+      }
       StopThunder(ThunderObj);
     }
   }
@@ -523,14 +530,16 @@ function EndTimer() {
   // TODO convert this to fade out
   if (CheckIfContextExists(RainObj)) {
     RainObj.audioCtx.suspend().then(function () {
-      this.lastChild.classList.remove("fa-pause-circle-o");
-      this.lastChild.classList.add("fa-play-circle-o");
-    }.bind(this));;
+      controllerBtn.lastElementChild.classList.remove("fa-pause-circle-o");
+      controllerBtn.lastElementChild.classList.add("fa-play-circle-o");
+    });
     RainObj.isPlaying = false;
+    if (rainLightsEnabled) {
+      StopRainLights();
+    }
   }
   if (CheckIfContextExists(ThunderObj)) {
-    ThunderObj.audioCtx.suspend();
-    ThunderObj.isPlaying = false;
+    StopThunder(ThunderObj);
   }
 }
 
@@ -591,9 +600,9 @@ let thunderEnabled = false;
 thunderToggleBtn.onclick = function () {
   if (!thunderEnabled) {
     if (CheckIfContextExists(ThunderObj) == false) {
-      this.lastChild.classList.remove("fa-toggle-off");
-      this.lastChild.classList.add("fa-bolt");
-      this.lastChild.classList.add("fa-spin");
+      this.lastElementChild.classList.remove("fa-toggle-off");
+      this.lastElementChild.classList.add("fa-bolt");
+      this.lastElementChild.classList.add("fa-spin");
       this.setAttribute("disabled","disabled");
 
       UpdateContextDisplay(thunderContextDisplay);
@@ -611,16 +620,16 @@ thunderToggleBtn.onclick = function () {
       GetFileNames(dir, listOfThunderFiles, "listFiles.php", LoadSounds, ThunderObj);
     }
     else {
-      this.lastChild.classList.remove("fa-toggle-off");
-      this.lastChild.classList.add("fa-toggle-on");
+      this.lastElementChild.classList.remove("fa-toggle-off");
+      this.lastElementChild.classList.add("fa-toggle-on");
       thunderEnabled = true;
       document.querySelector("#thunderControls").hidden = false;
     }
   }
   else { // Thunder IS enabled.
     StopThunder(ThunderObj);
-    this.lastChild.classList.remove("fa-toggle-on");
-    this.lastChild.classList.add("fa-toggle-off");
+    this.lastElementChild.classList.remove("fa-toggle-on");
+    this.lastElementChild.classList.add("fa-toggle-off");
     thunderEnabled = false;
     document.querySelector("#thunderControls").hidden = true;
   }
@@ -680,14 +689,20 @@ function FlashThunder() {
   //   }, time * 100 + 50);
   // }
   // Copy lightning json file for Python to catch and display.
-  $.post("copyFile.php", { originalName: "Lightning.json", source: "scripts/Animations/json/", destination: "ledlayers/", newName: "layerX.json"},
+  $.post("copyFile.php", { originalName: "Lightning.json", source: "scripts/Animations/json/", destination: "ledlayers/", newName: "layer4.json"},
     function (result) {
       console.log(result);
+      setTimeout(function() {
+        $.post("copyFile.php", { originalName: "Clear.json", source: "scripts/Animations/json/", destination: "ledlayers/", newName: "layer4.json" },
+          function (result) {
+            console.log(result);
+          })
+      }, 2000)
+
   })
   .fail(function(xhr) {
     console.log("Error: '" + "copyFile.php" + "': " + xhr.status + " " + xhr.statusText);
   })
-
 }
 
 let SilenceSound = {
@@ -748,7 +763,9 @@ function ScheduleLightning(delay = 0) {
   SilenceSound.bufferSource.connect(SilenceSound.gainNode);
 
   SilenceSound.bufferSource.onended = function () {
-    FlashThunder();
+    if (lightningLightsEnabled) {
+      FlashThunder();
+    }
     SilenceSound.instances--;
     if (SilenceSound.instances == 0) {
       SilenceSound.audioCtx.suspend();
@@ -763,8 +780,11 @@ function ScheduleLightning(delay = 0) {
 function SuspendLightning()
 {
   if (CheckIfContextExists(SilenceSound)) {
-    SilenceSound.bufferSource.onended = null;
-    SilenceSound.bufferSource.stop();
+    if (SilenceSound.bufferSource)
+    {
+      SilenceSound.bufferSource.onended = null;
+      SilenceSound.bufferSource.stop();
+    }
     SilenceSound.instances = 0;
     SilenceSound.audioCtx.suspend();
   }
@@ -806,19 +826,134 @@ document.querySelector("#signoff").onclick = function() {
 
 }
 
-document.querySelector(".darkenedBackground").onclick = function () {
-  this.parentElement.hidden = true;
-}
+document.querySelectorAll(".darkenedBackground").forEach(function (el) {
+  el.onclick = function () {
+    this.parentElement.hidden = true;
+    document.querySelector(".lightsButton").style.zIndex = "auto";
+    document.querySelector(".lightningButton").style.zIndex = "auto";
+  }
+});
 
 let rainLightsEnabled = false;
+let rainJSON = {};
+
 document.querySelector(".lightsButton").onclick = function () {
   rainLightsEnabled = !rainLightsEnabled;
+  this.style.zIndex = "4";
+  document.querySelector("#sound .lightsBrightness").parentElement.querySelector(".val").innerHTML = document.querySelector("#sound .lightsBrightness").value;
+  document.querySelector("#sound .lightsSpeed").parentElement.querySelector(".val").innerHTML = document.querySelector("#sound .lightsSpeed").value;
   if (rainLightsEnabled) {
     this.firstChild.style.color = "#C0C090";
+
+    $.getJSON("scripts/Animations/json/Rain.json", { _: new Date().getTime() }, function (result) {
+      rainJSON = result;
+      rainJSON.html[0].value = document.querySelector("#sound .lightsBrightness").value.toString();
+      rainJSON.html[1].value = document.querySelector("#sound .lightsSpeed").value.toString();
+      let text = JSON.stringify(rainJSON);
+      $.post("writeValue.php", { value: text, fileName: "scripts/Animations/json/Rain.json", fileMode: "w+" },
+        function (result) {
+        })
+        .fail(function (xhr) {
+          console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
+        })
+    }.bind(this));
+
     // Enable rain
+    if (RainObj.isPlaying) {
+      StartRainLights();
+    }
   }
   else {
     this.firstChild.style.color = "lightblue";
   }
   this.nextElementSibling.hidden = false;
+}
+
+document.querySelector("#sound .lightsBrightness").oninput = function () {
+  this.parentElement.querySelector(".val").innerHTML = this.value;
+  rainJSON.html[0].value = this.value.toString();
+  // Write to the layer
+  if (rainLightsEnabled) {
+    $.post("writeValue.php", { value: JSON.stringify(rainJSON), fileName: "ledlayers/layer3.json", fileMode: "w+" },
+      function (result) {
+      })
+      .fail(function (xhr) {
+        console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
+      })
+  }
+}
+
+document.querySelector("#sound .lightsSpeed").oninput = function () {
+  this.parentElement.querySelector(".val").innerHTML = this.value;
+  rainJSON.html[1].value = this.value.toString();
+  // Write to the layer
+  if (rainLightsEnabled) {
+    $.post("writeValue.php", { value: JSON.stringify(rainJSON), fileName: "ledlayers/layer3.json", fileMode: "w+" },
+      function (result) {
+      })
+      .fail(function (xhr) {
+        console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
+      })
+  }
+}
+
+function StartRainLights() {
+  $.post("copyFile.php", { originalName: "Rain.json", source: "scripts/Animations/json/", destination: "ledlayers/", newName: "layer3.json" },
+    function (result) {
+      console.log(result);
+    })
+    .fail(function (xhr) {
+      console.log("Error: '" + "copyFile.php" + "': " + xhr.status + " " + xhr.statusText);
+    })
+}
+
+function StopRainLights() {
+  $.post("copyFile.php", { originalName: "Clear.json", source: "scripts/Animations/json/", destination: "ledlayers/", newName: "layer3.json" },
+    function (result) {
+      console.log(result);
+    })
+    .fail(function (xhr) {
+      console.log("Error: '" + "copyFile.php" + "': " + xhr.status + " " + xhr.statusText);
+    })
+}
+
+let lightningLightsEnabled = false;
+let lightningJSON = {};
+document.querySelector(".lightningButton").onclick = function () {
+  lightningLightsEnabled = !lightningLightsEnabled;
+  this.style.zIndex = "4";
+  document.querySelector("#thunderControls .lightsBrightness").parentElement.querySelector(".val").innerHTML = document.querySelector("#thunderControls .lightsBrightness").value;
+  if (lightningLightsEnabled) {
+    this.firstChild.style.color = "#C0C090";
+
+    $.getJSON("scripts/Animations/json/Lightning.json", { _: new Date().getTime() }, function (result) {
+      lightningJSON = result;
+      lightningJSON.html[0].value = document.querySelector("#thunderControls .lightsBrightness").value.toString();
+      let text = JSON.stringify(lightningJSON);
+      $.post("writeValue.php", { value: text, fileName: "scripts/Animations/json/Lightning.json", fileMode: "w+" },
+        function (result) {
+        })
+        .fail(function (xhr) {
+          console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
+        })
+    }.bind(this));
+  }
+  else {
+    this.firstChild.style.color = "lightblue";
+  }
+  this.nextElementSibling.hidden = false;
+}
+
+document.querySelector("#thunderControls .lightsBrightness").oninput = function () {
+  this.parentElement.querySelector(".val").innerHTML = this.value;
+  lightningJSON.html[0].value = this.value.toString();
+  // Write to the layer
+  if (lightningLightsEnabled) {
+    $.post("writeValue.php", { value: JSON.stringify(lightningJSON), fileName: "ledlayers/layer4.json", fileMode: "w+" },
+      function (result) {
+      })
+      .fail(function (xhr) {
+        console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
+      })
+  }
 }

@@ -6,6 +6,7 @@
   background-position: top center;
   overflow: hidden;
 } */
+
 html {
   background-color: black;
 }
@@ -32,7 +33,6 @@ h1 {
 /* #sound > h2, #sound > div > h3, #sound > div > h4, #sound > div > label {
   color: lightblue;
 } */
-
 
 #lights {
   background: rgb(2,0,36);
@@ -66,6 +66,7 @@ h1 {
   border-style: none;
   pointer-events: auto; 
 }
+
 .layerRefresh {
   color: lightblue;
   /* background-color: #0000003f; */
@@ -123,7 +124,7 @@ input[type=tel]:invalid {
   border-color: white; */
 }
 
-.lightsContainer .popoutContainer {
+.popoutContainer {
   position: absolute;
   top: 2ch;
   right: 0;
@@ -141,7 +142,7 @@ input[type=tel]:invalid {
     right: 0;
 }
 
-.lightsContainer .popoutContents {
+.popoutContents {
   background: rgba(10, 10, 150, 0.5);
   border-radius: 10px 0 10px 10px;
   position: relative;
@@ -154,16 +155,6 @@ input[type=tel]:invalid {
   width: 100%;
 }
 
-.lightsContainer .popoutContainer1 {
-  /* background: rgba(255, 0, 0, 0.5); */
-  margin-left: auto;
-  margin-right: 0;
-  width: fit-content;
-  border-radius: 50% 50% 0 0;
-  position: relative;
-  z-index: 4;
-}
-
 .lightsButton {
   background: transparent;
   border-style: none;
@@ -173,7 +164,6 @@ input[type=tel]:invalid {
   margin-right: 0;
   width: 5ch;
   position: relative;
-  z-index: 4;
 }
 
 .lightsButton > i {
@@ -192,6 +182,25 @@ input[type=tel]:invalid {
   z-index:    2;
   background: black; 
   opacity:    0.5;
+}
+
+.lightningButton {
+  background: transparent;
+  border-style: none;
+  /* border-radius: 50%; */
+  display: block;
+  margin-left: auto;
+  margin-right: 10vw;
+  width: 5ch;
+  position: absolute;
+  right: -10vw;
+}
+
+.lightningButton > i {
+  font-size: 10vw;
+  color: lightblue;
+  display: block;
+  /* color: rgb(77, 94, 100); */
 }
 
 #sound > * {

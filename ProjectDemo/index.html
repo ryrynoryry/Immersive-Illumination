@@ -25,25 +25,25 @@
   <body id="myPage">
     
     <!-- Navbar -->
-    <div class="w3-top">
+    <div class="w3-top" style="z-index: 10;">
       <div id="navBar" class="w3-bar w3-left-align" style="background: #000000;">
         <a class="w3-bar-item w3-button w3-right w3-hover-white w3-theme-d2"
           href="javascript:void(0);" onclick="openNav()"><i class="fa fa-lg fa-bars"></i></a> <!--Hamburger -->
-        <a href="prototype.html" class="w3-bar-item w3-button w3-teal"><i class="fa fa-lg fa-home"></i></a> <!--Home -->
-        <button class="w3-bar-item w3-button w3-right w3-theme w3-hover-teal"style="border-radius: 50%; width: auto;"
-                onclick="document.getElementById('id01').style.display='block'"><i class="fa fa-lg fa-heart"></i></button>
+        <!-- <a href="prototype.html" class="w3-bar-item w3-button w3-teal"><i class="fa fa-lg fa-home"></i></a> Home -->
+        <!-- <button class="w3-bar-item w3-button w3-right w3-theme w3-hover-teal"style="border-radius: 50%; width: auto;"
+                onclick="document.getElementById('id01').style.display='block'"><i class="fa fa-lg fa-heart"></i></button> -->
+        <button class="w3-bar-item w3-button w3-teal"
+                onclick="document.getElementById('id01').style.display='block'"><i class="fa fa-lg fa-heart"></i></button> <!--Heart -->
       </div>
       <div style="width: 100%; height: 3vh; background: linear-gradient(#000000EF 0%, #00000000 100%); "></div>
 
 
       <!-- Navbar on small screens -->
       <div id="navDemo" class="w3-bar-block w3-right w3-theme-d2 w3-hide">
-        <a href="#top" class="w3-bar-item w3-button">Top</a>
         <a href="#sound" class="w3-bar-item w3-button">Sound</a>
         <a href="#lights" class="w3-bar-item w3-button">Lights</a>
       </div>
     </div>
-
 
     <!-- Modal -->
     <div id="id01" class="w3-modal">
@@ -81,11 +81,18 @@
         <div class="popoutContainer" hidden>
           <div class="popoutContents">
             <br>
-            <label>Brightness</label>
-            <input type="range" min="-0" max="100" value="50">
-            
-            <label>Speed</label>
-            <input type="range" min="-0" max="100" value="50">
+            <div>
+              <label>Brightness: </label>
+              <label class="val">100</label>
+              <label>%</label>
+              <input class="lightsBrightness" type="range" min="-0" max="100" value="11">
+            </div>
+            <div>
+              <label>Speed:</label>
+              <label class="val">100</label>
+              <label>%</label>
+              <input class="lightsSpeed" type="range" min="-0" max="100" value="7">
+            </div>
           </div>
           <div class="darkenedBackground"></div>
         </div>
@@ -110,8 +117,7 @@
       <div class="w3-dropdown-hover">
         <button class="w3-button" onclick="this.nextElementSibling.classList.remove('w3-hide');">Sound Settings <i class="fa fa-caret-down"></i></button>
         <div class="w3-dropdown-content w3-display-bottommiddle" style="width: 100vw; position: absolute; top: 5ch;">
-          <div onclick="this.parentElement.classList.add('w3-hide');"
-            style="width: 100%; position: absolute; top: -90vh; background-color: #00000040;">
+          <div onclick="this.parentElement.classList.add('w3-hide');" style="width: 100%; position: absolute; top: -90vh; background-color: #00000040;">
             <div id="rainSettings">
               <div class="w3-card-4 w3-bar-block w3-blue" style="width: 75%; margin: 90vh auto;">
                 <div class="low w3-bar-item w3-center">
@@ -140,12 +146,29 @@
         <h3 class="" style="margin-bottom: 0px; margin-right: 1ch; display: inline; vertical-align: middle;">Thunder</h3>
         <button id="thunderToggle" class="w3-button" style="padding: 0px; border-radius: 100%; "><i class="fa fa-3x fa-toggle-off"></i></button>
 
-        <div id="thunderControls">
+        <div id="thunderControls" hidden>
+          <div class="lightsContainer" style="display: block;">
+            <button class="lightningButton"><i class="fa fa-lightbulb-o"></i></button>
+            <div class="popoutContainer" hidden>
+              <div class="popoutContents">
+                <br>
+                <div>
+                  <label>Brightness: </label>
+                  <label class="val">100</label>
+                  <label>%</label>
+                  <input class="lightsBrightness" type="range" min="-0" max="100" value="12">
+                </div>
+              </div>
+              <div class="darkenedBackground"></div>
+            </div>
+          </div>
           <div id="thunderPrimarySliders">
             <div class="freq">
               <h4 class="label" style="margin-bottom: 0px;">Interval</h4>
-              <h5 class="val" style="margin: 0px;">1</h5>
-              <input class="slider" type="range" min="1" max="30" value="1" style="width: 75vw;">
+              <h5 class="val" style="margin: 0px; display: inline-block;">30</h5>
+              <i style="font-size:small; font-style: normal;"> seconds</i>
+              <br>
+              <input class="slider" type="range" min="10" max="120" value="30" style="width: 75vw;">
             </div>
           </div>
 
@@ -408,11 +431,8 @@
     </script>
 
     <script src="script.js"></script>
-    <script src="lights.js"></script>
     <script src="dynamic.js"></script>
     <script src="BufferLoader.js"></script>
-    <!-- <script src="webaudio.js"></script> -->
-    <script src="rate.js"></script>
 
   </body>
 
