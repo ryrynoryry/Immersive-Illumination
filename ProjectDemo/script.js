@@ -849,7 +849,7 @@ document.querySelector(".lightsButton").onclick = function () {
       rainJSON = result;
       rainJSON.html[0].value = document.querySelector("#sound .lightsBrightness").value.toString();
       rainJSON.html[1].value = document.querySelector("#sound .lightsSpeed").value.toString();
-      let text = JSON.stringify(rainJSON);
+      let text = JSON.stringify(rainJSON, null, 2);
       $.post("writeValue.php", { value: text, fileName: "scripts/Animations/json/Rain.json", fileMode: "w+" },
         function (result) {
         })
@@ -874,7 +874,7 @@ document.querySelector("#sound .lightsBrightness").oninput = function () {
   rainJSON.html[0].value = this.value.toString();
   // Write to the layer
   if (rainLightsEnabled) {
-    $.post("writeValue.php", { value: JSON.stringify(rainJSON), fileName: "ledlayers/layer3.json", fileMode: "w+" },
+    $.post("writeValue.php", { value: JSON.stringify(rainJSON, null, 2), fileName: "ledlayers/layer3.json", fileMode: "w+" },
       function (result) {
       })
       .fail(function (xhr) {
@@ -888,7 +888,7 @@ document.querySelector("#sound .lightsSpeed").oninput = function () {
   rainJSON.html[1].value = this.value.toString();
   // Write to the layer
   if (rainLightsEnabled) {
-    $.post("writeValue.php", { value: JSON.stringify(rainJSON), fileName: "ledlayers/layer3.json", fileMode: "w+" },
+    $.post("writeValue.php", { value: JSON.stringify(rainJSON, null, 2), fileName: "ledlayers/layer3.json", fileMode: "w+" },
       function (result) {
       })
       .fail(function (xhr) {
@@ -929,7 +929,7 @@ document.querySelector(".lightningButton").onclick = function () {
     $.getJSON("scripts/Animations/json/Lightning.json", { _: new Date().getTime() }, function (result) {
       lightningJSON = result;
       lightningJSON.html[0].value = document.querySelector("#thunderControls .lightsBrightness").value.toString();
-      let text = JSON.stringify(lightningJSON);
+      let text = JSON.stringify(lightningJSON, null, 2);
       $.post("writeValue.php", { value: text, fileName: "scripts/Animations/json/Lightning.json", fileMode: "w+" },
         function (result) {
         })
@@ -949,7 +949,7 @@ document.querySelector("#thunderControls .lightsBrightness").oninput = function 
   lightningJSON.html[0].value = this.value.toString();
   // Write to the layer
   if (lightningLightsEnabled) {
-    $.post("writeValue.php", { value: JSON.stringify(lightningJSON), fileName: "ledlayers/layer4.json", fileMode: "w+" },
+    $.post("writeValue.php", { value: JSON.stringify(lightningJSON, null, 2), fileName: "ledlayers/layer4.json", fileMode: "w+" },
       function (result) {
       })
       .fail(function (xhr) {

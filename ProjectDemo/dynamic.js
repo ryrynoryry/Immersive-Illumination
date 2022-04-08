@@ -63,7 +63,7 @@ function WritePattern(inputObj, patternName, layer) {
     }
     return true;
   });
-  UpdateJSONFile(JSON.stringify(jsonObjs[layer - 1]), patternName + ".json", layer - 1, CopyJSONFileToLayer);
+  UpdateJSONFile(JSON.stringify(jsonObjs[layer - 1], null, 2), patternName + ".json", layer - 1, CopyJSONFileToLayer);
 }
 
 // Overwrite the contents of the specified file with the given text.
