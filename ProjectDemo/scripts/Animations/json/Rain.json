@@ -1,6 +1,22 @@
 {
   "sequence": "Rain",
-  "layer": "0",
+  "layer": 3,
   "displayName": "Rain",
-  "html": []
+  "html": [
+    {
+      "name": "Brightness",
+      "element": "range",
+      "value": "15"
+    },
+    {
+      "name": "Speed",
+      "element": "range",
+      "value": "6"
+    },
+    {
+      "name": "Chance",
+      "element": "range",
+      "value": "6"
+    }
+  ]
 }

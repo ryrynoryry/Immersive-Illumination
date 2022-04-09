@@ -8,7 +8,8 @@ class RunningLights(BaseAnimation):
     self.name = "RunningLights"
     self.looping = True
     self.color = self.ToRGB(args[0]["value"])
-    self.freq = args[1]["value"]
+    # TODO: Change all py's to set default values then call Setup.
+    self.freq = float(int(args[1]["value"]) / 50)
     self.reverse = args[2]["value"]
 
   def Step(self):
@@ -27,8 +28,11 @@ class RunningLights(BaseAnimation):
     return True
 
   def Setup(self, args):
-    self.color = self.ToRGB(args[0]["value"])
-    self.freq = int(args[1]["value"])
-    if self.freq == 0:
-      self.freq = 1
-    self.reverse = args[2]["value"] == ''
+    try:
+      self.color = self.ToRGB(args[0]["value"])
+      self.freq = int(args[1]["value"])
+      if self.freq == 0:
+        self.freq = 1
+      self.reverse = args[2]["value"] == ''
+    except ValueError as e:
+      print(f"Error in layer {self.layer}: No change. {e}")

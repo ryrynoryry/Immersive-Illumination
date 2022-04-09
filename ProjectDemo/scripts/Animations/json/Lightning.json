@@ -1,17 +1,22 @@
 {
   "sequence": "Lightning",
-  "layer": "1",
+  "layer": 4,
   "displayName": "Lightning",
   "html": [
     {
+      "name": "Brightness",
+      "element": "range",
+      "value": "12"
+    },
+    {
       "name": "IlluminationAreaStart",
       "element": "number",
-      "value": 50
+      "value": "50"
     },
     {
       "name": "IlluminationAreaEnd",
       "element": "number",
-      "value": 150
+      "value": "160"
     }
   ]
 }
