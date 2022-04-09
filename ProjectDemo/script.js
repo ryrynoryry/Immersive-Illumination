@@ -838,8 +838,15 @@ let rainLightsEnabled = false;
 let rainJSON = {};
 
 document.querySelector(".lightsButton").onclick = function () {
-  rainLightsEnabled = !rainLightsEnabled;
+  if (this.nextElementSibling.hidden == true) {
+    rainLightsEnabled = true;
+  }
+  else {
+    rainLightsEnabled = !rainLightsEnabled;
+  }
+  this.nextElementSibling.hidden = false;
   this.style.zIndex = "4";
+
   document.querySelector("#sound .lightsBrightness").parentElement.querySelector(".val").innerHTML = document.querySelector("#sound .lightsBrightness").value;
   document.querySelector("#sound .lightsSpeed").parentElement.querySelector(".val").innerHTML = document.querySelector("#sound .lightsSpeed").value;
   if (rainLightsEnabled) {
@@ -865,16 +872,27 @@ document.querySelector(".lightsButton").onclick = function () {
   }
   else {
     this.firstChild.style.color = "lightblue";
+    if (RainObj.isPlaying) {
+      StopRainLights()
+    }
   }
-  this.nextElementSibling.hidden = false;
 }
 
 document.querySelector("#sound .lightsBrightness").oninput = function () {
   this.parentElement.querySelector(".val").innerHTML = this.value;
   rainJSON.html[0].value = this.value.toString();
+  let text = JSON.stringify(rainJSON, null, 2);
   // Write to the layer
   if (rainLightsEnabled) {
-    $.post("writeValue.php", { value: JSON.stringify(rainJSON, null, 2), fileName: "ledlayers/layer3.json", fileMode: "w+" },
+    $.post("writeValue.php", { value: text, fileName: "ledlayers/layer3.json", fileMode: "w+" },
+      function (result) {
+      })
+      .fail(function (xhr) {
+        console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
+      })
+  }
+  else {
+    $.post("writeValue.php", { value: text, fileName: "scripts/Animations/json/Rain.json", fileMode: "w+" },
       function (result) {
       })
       .fail(function (xhr) {
@@ -886,9 +904,18 @@ document.querySelector("#sound .lightsBrightness").oninput = function () {
 document.querySelector("#sound .lightsSpeed").oninput = function () {
   this.parentElement.querySelector(".val").innerHTML = this.value;
   rainJSON.html[1].value = this.value.toString();
+  let text = JSON.stringify(rainJSON, null, 2);
   // Write to the layer
   if (rainLightsEnabled) {
-    $.post("writeValue.php", { value: JSON.stringify(rainJSON, null, 2), fileName: "ledlayers/layer3.json", fileMode: "w+" },
+    $.post("writeValue.php", { value: text, fileName: "ledlayers/layer3.json", fileMode: "w+" },
+      function (result) {
+      })
+      .fail(function (xhr) {
+        console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
+      })
+  }
+  else {
+    $.post("writeValue.php", { value: text, fileName: "scripts/Animations/json/Rain.json", fileMode: "w+" },
       function (result) {
       })
       .fail(function (xhr) {
@@ -920,8 +947,15 @@ function StopRainLights() {
 let lightningLightsEnabled = false;
 let lightningJSON = {};
 document.querySelector(".lightningButton").onclick = function () {
-  lightningLightsEnabled = !lightningLightsEnabled;
+  if (this.nextElementSibling.hidden == true) {
+    lightningLightsEnabled = true;
+  }
+  else {
+    lightningLightsEnabled = !lightningLightsEnabled;
+  }
+  this.nextElementSibling.hidden = false;
   this.style.zIndex = "4";
+
   document.querySelector("#thunderControls .lightsBrightness").parentElement.querySelector(".val").innerHTML = document.querySelector("#thunderControls .lightsBrightness").value;
   if (lightningLightsEnabled) {
     this.firstChild.style.color = "#C0C090";
@@ -941,15 +975,23 @@ document.querySelector(".lightningButton").onclick = function () {
   else {
     this.firstChild.style.color = "lightblue";
   }
-  this.nextElementSibling.hidden = false;
 }
 
 document.querySelector("#thunderControls .lightsBrightness").oninput = function () {
   this.parentElement.querySelector(".val").innerHTML = this.value;
   lightningJSON.html[0].value = this.value.toString();
+  let text = JSON.stringify(lightningJSON, null, 2);
   // Write to the layer
   if (lightningLightsEnabled) {
-    $.post("writeValue.php", { value: JSON.stringify(lightningJSON, null, 2), fileName: "ledlayers/layer4.json", fileMode: "w+" },
+    $.post("writeValue.php", { value: text, fileName: "ledlayers/layer4.json", fileMode: "w+" },
+      function (result) {
+      })
+      .fail(function (xhr) {
+        console.log("Error: '" + "writeValue.php" + "': " + xhr.status + " " + xhr.statusText);
+      })
+  }
+  else {
+    $.post("writeValue.php", { value: text, fileName: "scripts/Animations/json/Lightning.json", fileMode: "w+" },
       function (result) {
       })
       .fail(function (xhr) {
