@@ -1,0 +1,17 @@
+{
+  "sequence": "Rainbow",
+  "layer": 0,
+  "displayName": "Rainbow",
+  "html": [
+    {
+      "name": "Brightness",
+      "element": "range",
+      "value": "100"
+    },
+    {
+      "name": "Speed",
+      "element": "range",
+      "value": "1"
+    }
+  ]
+}
