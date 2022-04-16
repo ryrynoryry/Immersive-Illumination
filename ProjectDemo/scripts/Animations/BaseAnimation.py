@@ -35,18 +35,29 @@ class BaseAnimation():
     curFrameRendering.wait()
     prevFrameRendered.wait()
 
-  def Fill(self, color):
-    for i in range(self.NUM_PIXELS):
+  def Fill(self, color, startPos = 0, numPixels = None):
+    if numPixels is None:
+      numPixels = self.NUM_PIXELS
+    startPos = max(0, startPos)
+    numPixels = max(0, numPixels)
+    for i in range(min(startPos, self.NUM_PIXELS), min(startPos + numPixels, self.NUM_PIXELS)):
       self.strip[i] = color
+
+  def FlipStrip(self):
+    self.strip.reverse()
 
   def ToRGB(self, hex):
     r,g,b = (None,None,None)
-    if isinstance(hex, str):
-      r, g, b = bytes.fromhex(hex.replace('#', ''))
-    else:
-      r = hex[0]
-      g = hex[1]
-      b = hex[2]
+    if hex:
+      if isinstance(hex, str):
+        r, g, b = bytes.fromhex(hex.replace('#', ''))
+      elif all(isinstance(hexStr, str) for hexStr in hex):
+        colors = [tuple(bytes.fromhex(el.replace('#', ''))) for el in hex]
+        return colors
+      else:
+        r = hex[0]
+        g = hex[1]
+        b = hex[2]
     return (r, g, b)
 
   def Lerp(self, start, end, t=0.5):
