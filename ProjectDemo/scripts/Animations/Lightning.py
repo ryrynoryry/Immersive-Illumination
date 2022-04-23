@@ -6,9 +6,13 @@ class Lightning(BaseAnimation):
       super().__init__(layer)
       self.name = "Lightning"
       self.looping = False
-      self.brightness = float(max(min(int(args[0]["value"]), 100),0)) / 100.0
-      self.illuminationArea = [max(min(int(args[1]["value"]), int(args[2]["value"])), 0),
-                               min(max(int(args[1]["value"]), int(args[2]["value"])), self.NUM_PIXELS - 1)]  # [StartPos, EndPos]
+      try:
+        self.brightness = float(max(min(int(float(args[0]["value"])), 100),0)) / 100.0
+        self.illuminationArea = [max(min(int(float(args[1]["value"])), int(float(args[2]["value"]))), 0),
+                                 min(max(int(float(args[1]["value"])), int(float(args[2]["value"]))), self.NUM_PIXELS - 1)]  # [StartPos, EndPos]
+      except ValueError as e:
+        self.brightness = 1.0
+        self.illuminationArea = [0, self.NUM_PIXELS - 1]
       self.lightningOver = False
       self.originalLightningColor = (255, 255, 255)
       self.lightningColor = [int((c * self.brightness) + 0.5) for c in self.originalLightningColor]
@@ -58,13 +62,16 @@ class Lightning(BaseAnimation):
     for i in range(self.illuminationArea[0], self.illuminationArea[1]):
       self.strip[i] = None
     self.ReleaseLock()
-    self.brightness = float(max(min(int(args[0]["value"]), 100), 0)) / 100.0
-    self.illuminationArea = [max(min(int(args[1]["value"]), int(args[2]["value"])), 0),
-                             min(max(int(args[1]["value"]), int(args[2]["value"])), self.NUM_PIXELS - 1)]  # [StartPos, EndPos] Default: [50, 160]
-    self.lightningColor = [int((c * self.brightness) + 0.5) for c in self.originalLightningColor]
-    self.subLightningColor = [int((c * self.SUB_BRIGHTNESS_PERCENT) + 0.5) for c in self.lightningColor]
-    self.subLightningColor = [max(e1, e2) for e1, e2 in zip(self.subLightningColor, self.MIN_VALUES)] # Ensure the minimum values are satisfied
-    self.fadeSpeed = 50 * self.brightness  # color values
+    try:
+      self.brightness = float(max(min(int(float(args[0]["value"])), 100), 0)) / 100.0
+      self.illuminationArea = [max(min(int(float(args[1]["value"])), int(float(args[2]["value"]))), 0),
+                               min(max(int(float(args[1]["value"])), int(float(args[2]["value"]))), self.NUM_PIXELS - 1)]  # [StartPos, EndPos] Default: [50, 160]
+      self.lightningColor = [int((c * self.brightness) + 0.5) for c in self.originalLightningColor]
+      self.subLightningColor = [int((c * self.SUB_BRIGHTNESS_PERCENT) + 0.5) for c in self.lightningColor]
+      self.subLightningColor = [max(e1, e2) for e1, e2 in zip(self.subLightningColor, self.MIN_VALUES)] # Ensure the minimum values are satisfied
+      self.fadeSpeed = 50 * self.brightness  # color values
+    except ValueError as e:
+      pass
 
     self.subStrikes = random.randint(0, self.MAX_SUBSTRIKES)
     self.buildingStrikes = random.randint(0, 4)

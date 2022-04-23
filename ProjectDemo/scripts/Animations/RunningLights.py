@@ -10,7 +10,7 @@ class RunningLights(BaseAnimation):
     self.color = self.ToRGB(args[0]["value"])
     # TODO: Change all py's to set default values then call Setup.
     self.freq = float(int(args[1]["value"]) / 50)
-    self.reverse = args[2]["value"]
+    self.reverse = args[2]["value"] == "true"
 
   def Step(self):
     self.AquireLock()
@@ -30,9 +30,7 @@ class RunningLights(BaseAnimation):
   def Setup(self, args):
     try:
       self.color = self.ToRGB(args[0]["value"])
-      self.freq = int(args[1]["value"])
-      if self.freq == 0:
-        self.freq = 1
-      self.reverse = args[2]["value"] == ''
+      self.freq = float(int(args[1]["value"]) / 50)
+      self.reverse = args[2]["value"] == "true"
     except ValueError as e:
       print(f"Error in layer {self.layer}: No change. {e}")

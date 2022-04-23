@@ -68,6 +68,10 @@ function WritePattern(inputObj, patternName, layer) {
         };
         element.colors = colorList;
       }
+      else if (inputObj.type == "checkbox") {
+        inputObj.value = inputObj.checked.toString()
+        element.value = inputObj.value;
+      }
       // Object found, stop iterating.
       return false;
     }
@@ -206,7 +210,11 @@ function Populate(fileName, layer, doUpdate) {
         }
         else {
           $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<label for=${item.name}>${item.name}</label>`);
-          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<input type=${item.element} id=${item.name} value=${item.value} oninput="WritePattern(this, '${patternName}', ${layer})">`);
+          let checkedAttr = "";
+          if (item.element == "checkbox" && item.value == "true") {
+            checkedAttr = "checked";
+          }
+          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<input type=${item.element} id=${item.name} value=${item.value} ${checkedAttr} oninput="WritePattern(this, '${patternName}', ${layer})">`);
         }
       })
     }

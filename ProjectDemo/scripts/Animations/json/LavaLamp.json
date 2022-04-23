@@ -1,6 +1,6 @@
 {
   "sequence": "LavaLamp",
-  "layer": "2",
+  "layer": 0,
   "displayName": "LavaLamp",
   "html": [
     {
@@ -16,7 +16,7 @@
     {
       "name": "Speed",
       "element": "range",
-      "value": 1
+      "value": "1"
     }
   ]
 }

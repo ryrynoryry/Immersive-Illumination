@@ -1,6 +1,6 @@
 {
   "sequence": "RunningLights",
-  "layer": "0",
+  "layer": 0,
   "displayName": "Running Lights",
   "html": [
     {
@@ -10,13 +10,13 @@
     },
     {
       "name": "Frequency",
-      "element": "number",
-      "value": 1.0
+      "element": "range",
+      "value": "50"
     },
     {
       "name": "Reverse",
-      "element": "number",
-      "value": false
+      "element": "checkbox",
+      "value": "true"
     }
   ]
 }

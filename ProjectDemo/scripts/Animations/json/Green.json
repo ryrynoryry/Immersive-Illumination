@@ -1,12 +1,12 @@
 {
   "sequence": "Green",
-  "layer": "0",
+  "layer": 0,
   "displayName": "Green",
   "html": [
     {
       "name": "NumPixels",
       "element": "number",
-      "value": 3
+      "value": "3"
     }
   ]
 }
