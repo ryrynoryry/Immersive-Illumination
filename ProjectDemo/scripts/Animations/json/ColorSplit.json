@@ -4,6 +4,8 @@
   "displayName": "Color Split",
   "html": [
     {
+      "name": "Colors",
+      "element": "colorsList",
       "colors": [
         "#FF0000",
         "#00FF00",

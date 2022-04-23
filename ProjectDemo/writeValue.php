@@ -1,5 +1,6 @@
 <?php
 error_reporting(E_ALL);
+ini_set('display_errors', 1);
 $data = $_POST['value']; // the key we sent was "value"
 $fileName = $_POST['fileName']; // the key we sent was "fileName"
 $fileMode = $_POST['fileMode']; // the key we sent was "fileMode"

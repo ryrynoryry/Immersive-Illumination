@@ -5,7 +5,7 @@ class ColorSplit(BaseAnimation):
     super().__init__(layer)
     self.name = "ColorSplit"
     self.looping = False
-    self.colors = self.ToRGB(['#FF0000', '#00FF00', '#0000FF'])
+    self.colors = self.ToRGB(['#880000', '#008800', '#000088'])
     self.numSections = 3
     self.sectionLength = int((self.NUM_PIXELS / self.numSections) + 0.5)
     self.Setup(args)
@@ -27,6 +27,8 @@ class ColorSplit(BaseAnimation):
     return True
 
   def Setup(self, args):
-    self.colors = self.ToRGB(args[0]["colors"])
+    colorsArg = next((obj for obj in args if 'colors' in obj), None)
+    if not colorsArg:
+      self.colors = self.ToRGB(colorsArg)
     self.numSections = len(self.colors)
     self.sectionLength = int((self.NUM_PIXELS / self.numSections) + 0.5)

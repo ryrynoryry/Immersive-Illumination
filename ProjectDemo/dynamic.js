@@ -53,17 +53,31 @@ function WritePattern(inputObj, patternName, layer) {
   jsonObjs[layer - 1].layer = layer - 1
   jsonObjs[layer - 1].html.every(element => {
     if (element.name == inputObj.id) {
-      if (inputObj.value != "") {
-        element.value = inputObj.value;
+      if (inputObj.hasAttribute("value")) {
+        if (inputObj.value != "") {
+          element.value = inputObj.value;
+        }
+        else {
+          element.value = '0';
+        }
       }
-      else {
-        element.value = '0';
+      if ('colors' in element) {
+        let colorList = [];
+        for (child of inputObj.children) {
+          colorList.push(child.value);
+        };
+        element.colors = colorList;
       }
+      // Object found, stop iterating.
       return false;
     }
     return true;
   });
   UpdateJSONFile(JSON.stringify(jsonObjs[layer - 1], null, 2), patternName + ".json", layer - 1, CopyJSONFileToLayer);
+}
+
+function WritePatternByID(id, patternName, layer) {
+  WritePattern(document.querySelector("#" + id), patternName, layer);
 }
 
 // Overwrite the contents of the specified file with the given text.
@@ -172,10 +186,28 @@ function Populate(fileName, layer, doUpdate) {
                                                                                     <div class="fa fa-clone w3-padding-small" style="transform: rotate(-135deg); position: absolute;"></div>
                                                                                     <label class="w3-margin-left w3-padding-small">${layer}</label>
                                                                                   </div>`);
+      // Display the name.
       $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<h3>${result.displayName}</h3>`);
+      // Iterate through the 'html' field to display each item.
       $.each(result.html, function (i, item) {
-        $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<label for=${item.name}>${item.name}</label> `);
-        $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<input type=${item.element} id=${item.name} value=${item.value} oninput="WritePattern(this, '${patternName}', ${layer})">`);
+        if ('colors' in item) {
+          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<label for=${item.name}>${item.name}: </label>`);
+          // Add the +/- buttons.
+          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<button class="fa fa-minus w3-button w3-padding-small" style="display: inline;" onclick="PopColor('${item.name}', '${patternName}', ${layer})"></button>`);
+          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<button class="fa fa-plus w3-button w3-padding-small" style="display: inline;" onclick="PushColor('${item.name}', '${patternName}', ${layer})"></button>`);
+          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<br>`)
+          // Create the flex box
+          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<div id=${item.name} class="colors w3-margin-left w3-margin-bottom w3-margin-right" style="display: inline-flex; flex-wrap: wrap;">`);
+          // Add each of the colors to the flex box.
+          $.each(item.colors, function (j, color) {
+            $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName} > .colors`).append(`<input type="color" value=${color} oninput="WritePatternByID('${item.name}', '${patternName}', ${layer})"></input>`);
+          })
+          
+        }
+        else {
+          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<label for=${item.name}>${item.name}</label>`);
+          $(`#layer${layer} > .layerArea > .layerPatterns > .${patternName}`).append(`<input type=${item.element} id=${item.name} value=${item.value} oninput="WritePattern(this, '${patternName}', ${layer})">`);
+        }
       })
     }
   })
@@ -233,5 +265,46 @@ function ToggleLayerArea(obj) {
     obj.lastChild.classList.remove("fa-angle-up");
     obj.lastChild.classList.add("fa-angle-down");
     return false
+  }
+}
+
+// Add color to end.
+function PushColor(id, patternName, layer) {
+  let inputObj = document.querySelector("#" + id);
+  jsonObjs[layer - 1].html.every(element => {
+    if (element.name == inputObj.id) {
+      // Create new color input
+      let colorObj = document.createElement('input');
+      colorObj.setAttribute("type", "color");
+      colorObj.setAttribute("value", element.colors[element.colors.length - 1]);
+      colorObj.setAttribute("oninput", "WritePatternByID('" + id + "', '" + patternName + "', " + layer + ")");
+      // Add new color to end of the list.
+      inputObj.appendChild(colorObj);
+      // Object found, stop iterating.
+      return false;
+    }
+    return true;
+  });
+  WritePatternByID(id, patternName, layer);
+}
+
+// Remove color from end.
+function PopColor(id, patternName, layer) {
+  let inputObj = document.querySelector("#" + id);
+  let itemRemoved = false;
+  jsonObjs[layer - 1].html.every(element => {
+    if (element.name == inputObj.id) {
+      // Remove color input if there are more to remove.
+      if (inputObj.children.length > 1) {
+        inputObj.removeChild(inputObj.lastChild);
+        itemRemoved = true;
+      }
+      // Object found, stop iterating.
+      return false;
+    }
+    return true;
+  });
+  if (itemRemoved) {
+    WritePatternByID(id, patternName, layer);
   }
 }
