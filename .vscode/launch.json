@@ -2,15 +2,23 @@
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
+    "version": "0.3.0",
     "configurations": [
         {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${fileDirname}/threadScheduler.py",
+            "program": "${file}",
             "console": "integratedTerminal",
             "cwd": "${fileDirname}"
+        },
+        {
+          "name": "Python: LightsPython",
+          "type": "python",
+          "request": "launch",
+          "program": "C:/git/Immersive-Illumination/ProjectDemo/scripts/threadScheduler.py",
+          "console": "integratedTerminal",
+          "cwd": "C:/git/Immersive-Illumination/ProjectDemo/scripts"
         }
     ]
 }
