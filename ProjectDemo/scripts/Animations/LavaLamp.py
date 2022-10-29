@@ -26,14 +26,14 @@ class LavaLamp(BaseAnimation):
     self.row = int(self.iteration)
     if self.speed >= 1:
       for i in range(self.NUM_PIXELS):
-        self.localStrip[i] = [int(x + 0.5) for x in self.Lerp(self.color1, self.color2, self.noisePic[self.row][i]/128)]
+        self.localStrip[i] = [max(min(int(x + 0.5), 255), 0) for x in self.Lerp(self.color1, self.color2, self.noisePic[self.row][i]/128)]
     else:
       self.nextRow = (self.row + 1) % self.finalRow
       self.transition = self.iteration - self.row # Fractional value between the two rows
       for i in range(self.NUM_PIXELS):
         pixelColor = self.Lerp(self.color1, self.color2, self.noisePic[self.row][i]/128)
         nextPixelColor = self.Lerp(self.color1, self.color2, self.noisePic[self.nextRow][i]/128)
-        self.localStrip[i] = [int(x + 0.5) for x in self.Lerp(pixelColor, nextPixelColor, self.transition)]
+        self.localStrip[i] = [max(min(int(x + 0.5), 255), 0) for x in self.Lerp(pixelColor, nextPixelColor, self.transition)]
 
     self.AquireLock()
     for i in range(self.NUM_PIXELS):
@@ -64,9 +64,10 @@ class LavaLamp(BaseAnimation):
       self.needNewPic = False
 
   def GetNoiseFile(self, imgIndex, octaves, period):
-    fileName = "noise/noise%03d_%01d_%03d.png" % (imgIndex, octaves, period)
+    fileName = "/home/pi/Desktop/Server/html/scripts/noise/noise%03d_%01d_%03d.png" % (
+        imgIndex, octaves, period)
     if (not exists(fileName)):
-      fileName = "noise/noise%03d_%01d_%03d.png" % (0, octaves, period)
+      fileName = "/home/pi/Desktop/Server/html/scripts/noise/noise%03d_%01d_%03d.png" % (0, octaves, period)
 
     # https://stackoverflow.com/a/41925811
     im = Image.open(fileName)

@@ -8,7 +8,6 @@ class ColorSplit(BaseAnimation):
     self.colors = self.ToRGB(['#880000', '#008800', '#000088'])
     self.numSections = 3
     self.sectionLength = int((self.NUM_PIXELS / self.numSections) + 0.5)
-    self.Setup(args)
 
   def Step(self):
     self.AquireLock()
@@ -27,8 +26,8 @@ class ColorSplit(BaseAnimation):
     return True
 
   def Setup(self, args):
-    colorsArg = next((obj for obj in args if 'colors' in obj), None)
-    if not colorsArg:
+    colorsArg = next((obj['colors'] for obj in args if 'colors' in obj), None)
+    if colorsArg:
       self.colors = self.ToRGB(colorsArg)
     self.numSections = len(self.colors)
     self.sectionLength = int((self.NUM_PIXELS / self.numSections) + 0.5)
