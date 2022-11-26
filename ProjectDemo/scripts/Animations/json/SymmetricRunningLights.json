@@ -1,0 +1,32 @@
+{
+  "sequence": "SymmetricRunningLights",
+  "layer": 0,
+  "displayName": "Symmetric Running Lights",
+  "html": [
+    {
+      "name": "Color",
+      "element": "color",
+      "value": "#743b1d"
+    },
+    {
+      "name": "Frequency",
+      "element": "range",
+      "value": "50"
+    },
+    {
+      "name": "Speed",
+      "element": "number",
+      "value": "20"
+    },
+    {
+      "name": "Center",
+      "element": "number",
+      "value": "150"
+    },
+    {
+      "name": "Reverse",
+      "element": "checkbox",
+      "value": "false"
+    }
+  ]
+}
