@@ -11,7 +11,7 @@
     {
       "name": "Frequency",
       "element": "range",
-      "value": "50"
+      "value": "30"
     },
     {
       "name": "Speed",
